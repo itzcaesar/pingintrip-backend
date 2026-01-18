@@ -75,6 +75,7 @@ if ($Prod) {
     if (-not $BackendOnly) {
         Write-Host "   Dashboard:   http://localhost:3001"
     }
-    Write-Host "`nPress any key to exit launcher (Services will keep running)..."
-    $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
+    
+    Write-Host "`nPress Enter to exit launcher (Services will keep running in new windows)..."
+    Read-Host
 }
