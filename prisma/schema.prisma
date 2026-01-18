@@ -1,4 +1,4 @@
-generator client {
+Prgenerator client {
   provider = "prisma-client-js"
 }
 
@@ -22,6 +22,7 @@ enum BookingSource {
 enum VehicleType {
   CAR
   MOTOR
+  VAN
 }
 
 enum BookingStatus {
@@ -72,8 +73,9 @@ model Booking {
   pickupDate        DateTime
   duration          Int // days
   pickupLocation    String
-  dropoffLocation   String
+  dropoffLocation   String?
   notes             String?
+  totalPrice        Float         @default(0) // Added for IDR tracking
   status            BookingStatus @default(PENDING)
   assignedVehicleId String?
   assignedVehicle   Vehicle?      @relation(fields: [assignedVehicleId], references: [id])
@@ -110,6 +112,7 @@ model Vehicle {
   model       String
   plateNumber String        @unique
   capacity    Int
+  dailyRate   Float         @default(0) // Added for IDR pricing
   status      VehicleStatus @default(AVAILABLE)
   gpsDeviceId String?       @unique
   gpsDevice   GpsDevice?    @relation(fields: [gpsDeviceId], references: [id])

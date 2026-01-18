@@ -1,0 +1,5 @@
+-- AlterTable
+ALTER TABLE "bookings" ADD COLUMN     "totalPrice" DOUBLE PRECISION NOT NULL DEFAULT 0;
+
+-- AlterTable
+ALTER TABLE "vehicles" ADD COLUMN     "dailyRate" DOUBLE PRECISION NOT NULL DEFAULT 0;
