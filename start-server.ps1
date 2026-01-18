@@ -1,6 +1,3 @@
-# Pingintrip System Launcher
-# Usage: .\start-server.ps1 [-Prod] [-Migrate] [-Seed] [-BackendOnly]
-
 param(
     [switch]$Prod,
     [switch]$Migrate,
@@ -11,71 +8,66 @@ param(
 $ErrorActionPreference = "Stop"
 $ProjectRoot = $PSScriptRoot
 
-Write-Host "🚀 Pingintrip System Launcher" -ForegroundColor Cyan
-Write-Host "============================" -ForegroundColor Cyan
+Write-Host "Pingintrip System Launcher" -ForegroundColor Cyan
+Write-Host "==========================" -ForegroundColor Cyan
 
-# Navigate to project root
 Set-Location $ProjectRoot
 
 # Check backend dependencies
 if (-not (Test-Path "node_modules")) {
-    Write-Host "📦 Installing Backend dependencies..." -ForegroundColor Yellow
+    Write-Host "Installing Backend dependencies..." -ForegroundColor Yellow
     npm install
 }
 
-# Generate Prisma client
+# Generate Prisma
 if (-not (Test-Path "node_modules\.prisma\client")) {
-    Write-Host "🔧 Generating Prisma client..." -ForegroundColor Yellow
+    Write-Host "Generating Prisma client..." -ForegroundColor Yellow
     npx prisma generate
 }
 
-# Run migrations
+# Migrations
 if ($Migrate) {
-    Write-Host "🗄️  Running database migrations..." -ForegroundColor Yellow
+    Write-Host "Running migrations..." -ForegroundColor Yellow
     npx prisma migrate dev
 }
 
-# Run seed
+# Seed
 if ($Seed) {
-    Write-Host "🌱 Seeding database..." -ForegroundColor Yellow
+    Write-Host "Seeding database..." -ForegroundColor Yellow
     npx prisma db seed
 }
 
-# Check frontend dependencies
+# Frontend dependencies
 if (-not $BackendOnly -and -not (Test-Path "frontend\node_modules")) {
-    Write-Host "📦 Installing Frontend dependencies..." -ForegroundColor Yellow
+    Write-Host "Installing Frontend dependencies..." -ForegroundColor Yellow
     Set-Location "$ProjectRoot\frontend"
     npm install
     Set-Location $ProjectRoot
 }
 
-Write-Host "`n🚦 Starting Services..." -ForegroundColor Green
+Write-Host "Starting Services..." -ForegroundColor Green
 
 if ($Prod) {
-    # Production Mode
-    Write-Host "🏭 Production build not fully configured for easy local launch." -ForegroundColor Red
-    Write-Host "Please build components manually."
+    Write-Host "Production mode not supported in this script." -ForegroundColor Red
 } else {
-    # Development Mode
-    
-    # Start Backend
-    Write-Host "🔌 Starting Backend (Port 3000)..." -ForegroundColor Cyan
-    $BackendProcess = Start-Process powershell -ArgumentList "npm run start:dev" -PassThru
-    
+    # Backend
+    Write-Host "Starting Backend (Port 3000)..." -ForegroundColor Cyan
+    Start-Process powershell -ArgumentList "npm run start:dev"
+
     if (-not $BackendOnly) {
-        # Start Frontend
-        Write-Host "🎨 Starting Frontend (Port 3001)..." -ForegroundColor Magenta
+        # Frontend
+        Write-Host "Starting Frontend (Port 3001)..." -ForegroundColor Magenta
         Set-Location "$ProjectRoot\frontend"
-        $FrontendProcess = Start-Process powershell -ArgumentList "npm run dev" -PassThru
+        Start-Process powershell -ArgumentList "npm run dev"
         Set-Location $ProjectRoot
     }
 
-    Write-Host "`n✅ Systems Launched!" -ForegroundColor Green
-    Write-Host "   Backend API: http://localhost:3000/api"
+    Write-Host ""
+    Write-Host "Services Launched!" -ForegroundColor Green
+    Write-Host "Backend: http://localhost:3000/api"
     if (-not $BackendOnly) {
-        Write-Host "   Dashboard:   http://localhost:3001"
+        Write-Host "Dashboard: http://localhost:3001"
     }
-    
-    Write-Host "`nPress Enter to exit launcher (Services will keep running in new windows)..."
-    Read-Host
+
+    Read-Host "Press Enter to exit launcher..."
 }

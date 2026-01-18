@@ -1,0 +1,58 @@
+import { UsersService } from './users.service';
+import { CreateUserDto, UpdateUserDto } from './dto';
+import { PaginationDto } from '../common/dto';
+export declare class UsersController {
+    private readonly usersService;
+    constructor(usersService: UsersService);
+    create(createUserDto: CreateUserDto): Promise<Omit<{
+        email: string;
+        password: string;
+        id: string;
+        name: string;
+        role: import("@prisma/client").$Enums.Role;
+        isActive: boolean;
+        createdAt: Date;
+        updatedAt: Date;
+    }, "password">>;
+    findAll(paginationDto: PaginationDto): Promise<import("../common/dto").PaginatedResult<Omit<{
+        email: string;
+        password: string;
+        id: string;
+        name: string;
+        role: import("@prisma/client").$Enums.Role;
+        isActive: boolean;
+        createdAt: Date;
+        updatedAt: Date;
+    }, "password">>>;
+    findOne(id: string): Promise<Omit<{
+        email: string;
+        password: string;
+        id: string;
+        name: string;
+        role: import("@prisma/client").$Enums.Role;
+        isActive: boolean;
+        createdAt: Date;
+        updatedAt: Date;
+    }, "password">>;
+    update(id: string, updateUserDto: UpdateUserDto): Promise<Omit<{
+        email: string;
+        password: string;
+        id: string;
+        name: string;
+        role: import("@prisma/client").$Enums.Role;
+        isActive: boolean;
+        createdAt: Date;
+        updatedAt: Date;
+    }, "password">>;
+    remove(id: string): Promise<void>;
+    activate(id: string): Promise<Omit<{
+        email: string;
+        password: string;
+        id: string;
+        name: string;
+        role: import("@prisma/client").$Enums.Role;
+        isActive: boolean;
+        createdAt: Date;
+        updatedAt: Date;
+    }, "password">>;
+}
