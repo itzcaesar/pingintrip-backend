@@ -1,0 +1,177 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Enums
+enum Role {
+  ADMIN
+  STAFF
+}
+
+enum BookingSource {
+  WEB
+  GFORM
+  MANUAL
+}
+
+enum VehicleType {
+  CAR
+  MOTOR
+}
+
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  ON_TRIP
+  COMPLETED
+  CANCELLED
+}
+
+enum VehicleStatus {
+  AVAILABLE
+  BOOKED
+  MAINTENANCE
+}
+
+enum DriverRole {
+  DRIVER
+  GUIDE
+  BOTH
+}
+
+enum DriverStatus {
+  ACTIVE
+  OFF
+}
+
+// Models
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  name      String
+  role      Role     @default(STAFF)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("users")
+}
+
+model Booking {
+  id                String        @id @default(uuid())
+  customerName      String
+  phone             String
+  source            BookingSource
+  vehicleType       VehicleType
+  pickupDate        DateTime
+  duration          Int // days
+  pickupLocation    String
+  dropoffLocation   String
+  notes             String?
+  status            BookingStatus @default(PENDING)
+  assignedVehicleId String?
+  assignedVehicle   Vehicle?      @relation(fields: [assignedVehicleId], references: [id])
+  assignedDriverId  String?
+  assignedDriver    Driver?       @relation(fields: [assignedDriverId], references: [id])
+  history           BookingHistory[]
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+  deletedAt         DateTime?
+
+  @@index([pickupDate])
+  @@index([status])
+  @@index([source])
+  @@map("bookings")
+}
+
+model BookingHistory {
+  id         String   @id @default(uuid())
+  bookingId  String
+  booking    Booking  @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  fromStatus String?
+  toStatus   String
+  changedBy  String?
+  changedAt  DateTime @default(now())
+
+  @@index([bookingId])
+  @@map("booking_history")
+}
+
+model Vehicle {
+  id          String        @id @default(uuid())
+  type        VehicleType
+  brand       String
+  model       String
+  plateNumber String        @unique
+  capacity    Int
+  status      VehicleStatus @default(AVAILABLE)
+  gpsDeviceId String?       @unique
+  gpsDevice   GpsDevice?    @relation(fields: [gpsDeviceId], references: [id])
+  notes       String?
+  bookings    Booking[]
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  deletedAt   DateTime?
+
+  @@index([status])
+  @@index([plateNumber])
+  @@index([type])
+  @@map("vehicles")
+}
+
+model Driver {
+  id        String       @id @default(uuid())
+  name      String
+  phone     String
+  role      DriverRole
+  status    DriverStatus @default(ACTIVE)
+  notes     String?
+  bookings  Booking[]
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+  deletedAt DateTime?
+
+  @@index([status])
+  @@index([role])
+  @@map("drivers")
+}
+
+model GpsDevice {
+  id        String        @id @default(uuid())
+  deviceId  String        @unique
+  vehicle   Vehicle?
+  locations GpsLocation[]
+  createdAt DateTime      @default(now())
+
+  @@map("gps_devices")
+}
+
+model GpsLocation {
+  id        String    @id @default(uuid())
+  deviceId  String
+  device    GpsDevice @relation(fields: [deviceId], references: [id], onDelete: Cascade)
+  latitude  Float
+  longitude Float
+  speed     Float?
+  timestamp DateTime  @default(now())
+
+  @@index([deviceId, timestamp])
+  @@map("gps_locations")
+}
+
+model GformImport {
+  id           String   @id @default(uuid())
+  formId       String
+  responseHash String   @unique
+  bookingId    String?
+  importedAt   DateTime @default(now())
+
+  @@index([formId])
+  @@map("gform_imports")
+}
