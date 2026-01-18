@@ -36,6 +36,11 @@ export class BookingsController {
         return this.bookingsService.findAll(queryDto);
     }
 
+    @Get('stats')
+    getStats() {
+        return this.bookingsService.getStats();
+    }
+
     @Get(':id')
     findOne(@Param('id') id: string) {
         return this.bookingsService.findOne(id);

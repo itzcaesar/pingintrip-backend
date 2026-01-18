@@ -8,7 +8,7 @@ import {
     IsUUID,
 } from 'class-validator';
 import { BookingSource, VehicleType, BookingStatus } from '@prisma/client';
-import { Type } from 'class-transformer';
+import { Type, Transform } from 'class-transformer';
 import { PaginationDto } from '../../common/dto';
 
 export class CreateBookingDto {
@@ -22,6 +22,7 @@ export class CreateBookingDto {
     source: BookingSource;
 
     @IsEnum(VehicleType)
+    @Transform(({ value }) => typeof value === 'string' ? value.toUpperCase() : value)
     vehicleType: VehicleType;
 
     @IsDateString()
@@ -34,8 +35,9 @@ export class CreateBookingDto {
     @IsString()
     pickupLocation: string;
 
+    @IsOptional()
     @IsString()
-    dropoffLocation: string;
+    dropoffLocation?: string;
 
     @IsOptional()
     @IsString()

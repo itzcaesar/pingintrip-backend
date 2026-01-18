@@ -320,4 +320,63 @@ export class BookingsService {
             throw new ConflictException('Driver is currently off duty');
         }
     }
+    async getStats() {
+        const totalBookings = await this.prisma.booking.count({
+            where: { deletedAt: null },
+        });
+
+        const activeBookings = await this.prisma.booking.count({
+            where: {
+                deletedAt: null,
+                status: { in: [BookingStatus.CONFIRMED, BookingStatus.ON_TRIP] },
+            },
+        });
+
+        const revenueResult = await this.prisma.booking.aggregate({
+            where: {
+                deletedAt: null,
+                status: { in: [BookingStatus.COMPLETED, BookingStatus.ON_TRIP, BookingStatus.CONFIRMED] },
+            },
+            _sum: {
+                totalPrice: true,
+            },
+        });
+
+        const totalRevenue = revenueResult._sum.totalPrice || 0;
+
+        // Get daily revenue for last 30 days (for chart)
+        const thirtyDaysAgo = new Date();
+        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+        const recentBookings = await this.prisma.booking.findMany({
+            where: {
+                deletedAt: null,
+                createdAt: { gte: thirtyDaysAgo },
+            },
+            select: {
+                createdAt: true,
+                totalPrice: true,
+                status: true,
+            },
+        });
+
+        // Group by day
+        const dailyRevenue: Record<string, number> = {};
+        recentBookings.forEach(b => {
+            const date = b.createdAt.toISOString().split('T')[0];
+            dailyRevenue[date] = (dailyRevenue[date] || 0) + (b.totalPrice || 0);
+        });
+
+        const chartData = Object.keys(dailyRevenue).map(date => ({
+            date,
+            revenue: dailyRevenue[date],
+        })).sort((a, b) => a.date.localeCompare(b.date));
+
+        return {
+            totalBookings,
+            activeBookings,
+            totalRevenue,
+            chartData,
+        };
+    }
 }
