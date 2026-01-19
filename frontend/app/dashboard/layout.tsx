@@ -1,5 +1,5 @@
-import { Navbar } from "@/components/navbar";
-import { Sidebar } from "@/components/sidebar";
+import Sidebar from "@/components/sidebar";
+import Navbar from "@/components/navbar";
 
 export default function DashboardLayout({
     children,
@@ -7,16 +7,24 @@ export default function DashboardLayout({
     children: React.ReactNode;
 }) {
     return (
-        <div className="h-full relative bg-muted/40">
-            <div className="hidden h-full md:flex md:w-72 md:flex-col md:fixed md:inset-y-0 z-[80] bg-sidebar">
+        <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950 flex font-sans">
+            {/* 1. Fixed Sidebar */}
+            <aside className="fixed inset-y-0 left-0 z-50 w-64 border-r border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 hidden md:block transition-colors">
                 <Sidebar />
-            </div>
-            <main className="md:pl-72 h-full flex flex-col">
-                <Navbar />
-                <div className="flex-1 overflow-y-auto">
+            </aside>
+
+            {/* 2. Main Content Area */}
+            <div className="flex-1 flex flex-col md:pl-64 min-h-screen transition-all duration-300">
+                {/* 3. Sticky Navbar */}
+                <header className="sticky top-0 z-40 bg-white/80 dark:bg-zinc-900/80 backdrop-blur-md border-b border-zinc-200 dark:border-zinc-800 transition-colors">
+                    <Navbar />
+                </header>
+
+                {/* 4. Page Content */}
+                <main className="flex-1 p-6 lg:p-8 space-y-6 overflow-x-hidden">
                     {children}
-                </div>
-            </main>
+                </main>
+            </div>
         </div>
     );
 }
