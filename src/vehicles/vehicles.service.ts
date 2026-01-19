@@ -182,4 +182,109 @@ export class VehiclesService {
             orderBy: { brand: 'asc' },
         });
     }
+
+    // === Odometer ===
+    async updateOdometer(id: string, odometer: number) {
+        await this.findOne(id);
+        return this.prisma.vehicle.update({
+            where: { id },
+            data: { odometer },
+        });
+    }
+
+    // === Maintenance ===
+    async getMaintenance(id: string) {
+        await this.findOne(id);
+        return this.prisma.vehicleMaintenance.findMany({
+            where: { vehicleId: id },
+            orderBy: { createdAt: 'desc' },
+        });
+    }
+
+    async addMaintenance(id: string, dto: any) {
+        await this.findOne(id);
+        return this.prisma.vehicleMaintenance.create({
+            data: {
+                vehicleId: id,
+                type: dto.type,
+                description: dto.description,
+                dueAtKm: dto.dueAtKm,
+                dueDate: dto.dueDate ? new Date(dto.dueDate) : null,
+                cost: dto.cost || 0,
+                notes: dto.notes,
+            },
+        });
+    }
+
+    async updateMaintenance(vehicleId: string, maintenanceId: string, dto: any) {
+        await this.findOne(vehicleId);
+
+        const data: any = {};
+        if (dto.completedAt) data.completedAt = new Date(dto.completedAt);
+        if (dto.cost !== undefined) data.cost = dto.cost;
+        if (dto.notes !== undefined) data.notes = dto.notes;
+
+        // If completing oil change or coolant, update vehicle tracking
+        const maintenance = await this.prisma.vehicleMaintenance.findUnique({
+            where: { id: maintenanceId },
+        });
+
+        if (dto.completedAt && maintenance) {
+            const vehicle = await this.prisma.vehicle.findUnique({ where: { id: vehicleId } });
+            if (vehicle) {
+                if (maintenance.type === 'OIL_CHANGE') {
+                    await this.prisma.vehicle.update({
+                        where: { id: vehicleId },
+                        data: { lastOilChangeKm: vehicle.odometer },
+                    });
+                } else if (maintenance.type === 'COOLANT') {
+                    await this.prisma.vehicle.update({
+                        where: { id: vehicleId },
+                        data: { lastCoolantKm: vehicle.odometer },
+                    });
+                }
+            }
+        }
+
+        return this.prisma.vehicleMaintenance.update({
+            where: { id: maintenanceId },
+            data,
+        });
+    }
+
+    async deleteMaintenance(vehicleId: string, maintenanceId: string) {
+        await this.findOne(vehicleId);
+        await this.prisma.vehicleMaintenance.delete({
+            where: { id: maintenanceId },
+        });
+        return { message: 'Maintenance record deleted' };
+    }
+
+    // === Images ===
+    async getImages(id: string) {
+        await this.findOne(id);
+        return this.prisma.vehicleImage.findMany({
+            where: { vehicleId: id },
+            orderBy: { createdAt: 'desc' },
+        });
+    }
+
+    async addImage(id: string, dto: any) {
+        await this.findOne(id);
+        return this.prisma.vehicleImage.create({
+            data: {
+                vehicleId: id,
+                url: dto.url,
+                isPrimary: dto.isPrimary || false,
+            },
+        });
+    }
+
+    async removeImage(vehicleId: string, imageId: string) {
+        await this.findOne(vehicleId);
+        await this.prisma.vehicleImage.delete({
+            where: { id: imageId },
+        });
+        return { message: 'Image removed' };
+    }
 }

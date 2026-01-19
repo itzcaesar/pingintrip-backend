@@ -121,16 +121,21 @@ export declare class DriversService {
                 id: string;
                 createdAt: Date;
                 updatedAt: Date;
+                type: import("@prisma/client").$Enums.VehicleType;
                 notes: string | null;
                 status: import("@prisma/client").$Enums.VehicleStatus;
                 deletedAt: Date | null;
-                type: import("@prisma/client").$Enums.VehicleType;
                 brand: string;
                 model: string;
                 plateNumber: string;
                 capacity: number;
                 dailyRate: number;
                 gpsDeviceId: string | null;
+                odometer: number;
+                oilChangeKm: number;
+                coolantChangeKm: number;
+                lastOilChangeKm: number;
+                lastCoolantKm: number;
             } | null;
         } & {
             id: string;

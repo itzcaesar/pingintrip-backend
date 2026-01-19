@@ -1,10 +1,10 @@
 // app/dashboard/reports/page.tsx
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { TrendingUp, DollarSign, CarFront, CalendarCheck, Download, FileText, Loader2 } from "lucide-react";
+import { TrendingUp, DollarSign, CarFront, CalendarCheck, Download, FileText, Loader2, CalendarDays } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -26,6 +26,14 @@ import Papa from 'papaparse';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import api from "@/lib/api";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
+import { format, subDays, startOfMonth, startOfYear, isWithinInterval, parseISO } from "date-fns";
 
 const COLORS = ['#0EA5E9', '#10B981', '#8B5CF6'];
 
@@ -50,12 +58,43 @@ type Vehicle = {
 type Booking = {
     id: string;
     vehicleType: string;
+    pickupDate: string;
+    totalPrice: number;
+    status: string;
     assignedVehicle?: { brand: string; model: string };
+};
+
+type DateRangeOption = "7d" | "30d" | "thisMonth" | "thisYear" | "all";
+
+const dateRangeOptions: { value: DateRangeOption; label: string }[] = [
+    { value: "7d", label: "Last 7 Days" },
+    { value: "30d", label: "Last 30 Days" },
+    { value: "thisMonth", label: "This Month" },
+    { value: "thisYear", label: "This Year" },
+    { value: "all", label: "All Time" },
+];
+
+const getDateRange = (option: DateRangeOption): { start: Date; end: Date } => {
+    const now = new Date();
+    switch (option) {
+        case "7d":
+            return { start: subDays(now, 7), end: now };
+        case "30d":
+            return { start: subDays(now, 30), end: now };
+        case "thisMonth":
+            return { start: startOfMonth(now), end: now };
+        case "thisYear":
+            return { start: startOfYear(now), end: now };
+        case "all":
+        default:
+            return { start: new Date(2000, 0, 1), end: now };
+    }
 };
 
 export default function ReportsPage() {
     const [exportingCSV, setExportingCSV] = useState(false);
     const [exportingPDF, setExportingPDF] = useState(false);
+    const [dateRange, setDateRange] = useState<DateRangeOption>("30d");
 
     // Fetch stats from /bookings/stats (the actual available endpoint)
     const { data: stats, isLoading: loadingStats } = useQuery<DashboardStats>({
@@ -83,6 +122,41 @@ export default function ReportsPage() {
             return Array.isArray(res.data) ? res.data : (res.data?.data || []);
         },
     });
+
+    // Filter bookings by date range
+    const filteredBookings = useMemo(() => {
+        const range = getDateRange(dateRange);
+        return bookings.filter(b => {
+            try {
+                const pickupDate = parseISO(b.pickupDate);
+                return isWithinInterval(pickupDate, { start: range.start, end: range.end });
+            } catch {
+                return false;
+            }
+        });
+    }, [bookings, dateRange]);
+
+    // Calculate filtered stats
+    const filteredStats = useMemo(() => {
+        const totalRevenue = filteredBookings.reduce((sum, b) => sum + (b.totalPrice || 0), 0);
+        const totalBookings = filteredBookings.length;
+        const activeBookings = filteredBookings.filter(b => ['PENDING', 'CONFIRMED', 'ON_TRIP'].includes(b.status)).length;
+        return { totalRevenue, totalBookings, activeBookings };
+    }, [filteredBookings]);
+
+    // Filter chart data by date range
+    const filteredChartData = useMemo(() => {
+        if (!stats?.chartData) return [];
+        const range = getDateRange(dateRange);
+        return stats.chartData.filter(item => {
+            try {
+                const date = parseISO(item.date);
+                return isWithinInterval(date, { start: range.start, end: range.end });
+            } catch {
+                return false;
+            }
+        });
+    }, [stats?.chartData, dateRange]);
 
     // Calculate vehicle type distribution from actual vehicles
     const vehicleTypeData = vehicles.reduce((acc: { name: string; value: number }[], vehicle) => {
@@ -286,7 +360,18 @@ export default function ReportsPage() {
                     <h2 className="text-2xl font-bold tracking-tight text-foreground">Reports & Analytics</h2>
                     <p className="text-muted-foreground">Track your business performance and insights.</p>
                 </div>
-                <div className="flex gap-2">
+                <div className="flex items-center gap-2">
+                    <Select value={dateRange} onValueChange={(v) => setDateRange(v as DateRangeOption)}>
+                        <SelectTrigger className="w-[160px] border-border">
+                            <CalendarDays className="mr-2 h-4 w-4 text-muted-foreground" />
+                            <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                            {dateRangeOptions.map(opt => (
+                                <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
                     <Button
                         variant="outline"
                         className="border-border"
@@ -326,7 +411,7 @@ export default function ReportsPage() {
                         </div>
                         <div className="mt-3">
                             <p className="text-sm text-muted-foreground">Total Revenue</p>
-                            <p className="text-2xl font-bold text-foreground">{formatIDR(stats?.totalRevenue || 0)}</p>
+                            <p className="text-2xl font-bold text-foreground">{formatIDR(filteredStats.totalRevenue)}</p>
                         </div>
                     </CardContent>
                 </Card>
@@ -339,7 +424,7 @@ export default function ReportsPage() {
                         </div>
                         <div className="mt-3">
                             <p className="text-sm text-muted-foreground">Total Bookings</p>
-                            <p className="text-2xl font-bold text-foreground">{stats?.totalBookings || 0}</p>
+                            <p className="text-2xl font-bold text-foreground">{filteredStats.totalBookings}</p>
                         </div>
                     </CardContent>
                 </Card>
@@ -352,7 +437,7 @@ export default function ReportsPage() {
                         </div>
                         <div className="mt-3">
                             <p className="text-sm text-muted-foreground">Active Bookings</p>
-                            <p className="text-2xl font-bold text-foreground">{stats?.activeBookings || 0}</p>
+                            <p className="text-2xl font-bold text-foreground">{filteredStats.activeBookings}</p>
                         </div>
                     </CardContent>
                 </Card>
@@ -381,9 +466,9 @@ export default function ReportsPage() {
                     </CardHeader>
                     <CardContent>
                         <div className="h-[300px]">
-                            {stats?.chartData && stats.chartData.length > 0 ? (
+                            {filteredChartData.length > 0 ? (
                                 <ResponsiveContainer width="100%" height="100%">
-                                    <AreaChart data={stats.chartData}>
+                                    <AreaChart data={filteredChartData}>
                                         <defs>
                                             <linearGradient id="colorRev" x1="0" y1="0" x2="0" y2="1">
                                                 <stop offset="5%" stopColor="#0EA5E9" stopOpacity={0.3} />
@@ -391,15 +476,15 @@ export default function ReportsPage() {
                                             </linearGradient>
                                         </defs>
                                         <CartesianGrid strokeDasharray="3 3" vertical={false} className="stroke-border" />
-                                        <XAxis dataKey="date" className="text-muted-foreground" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(val) => new Date(val).getDate().toString()} />
+                                        <XAxis dataKey="date" className="text-muted-foreground" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(val) => format(parseISO(val), 'dd MMM')} />
                                         <YAxis className="text-muted-foreground" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(v) => `${(v / 1000000).toFixed(0)}M`} />
-                                        <Tooltip contentStyle={{ backgroundColor: 'var(--background)', border: '1px solid var(--border)', borderRadius: '8px' }} formatter={(val: any) => [formatIDR(val), 'Revenue']} />
+                                        <Tooltip contentStyle={{ backgroundColor: 'var(--background)', border: '1px solid var(--border)', borderRadius: '8px' }} formatter={(val: any) => [formatIDR(val), 'Revenue']} labelFormatter={(label) => format(parseISO(label), 'dd MMM yyyy')} />
                                         <Area type="monotone" dataKey="revenue" stroke="#0EA5E9" strokeWidth={2} fillOpacity={1} fill="url(#colorRev)" />
                                     </AreaChart>
                                 </ResponsiveContainer>
                             ) : (
                                 <div className="h-full flex items-center justify-center text-muted-foreground">
-                                    No revenue data available
+                                    No revenue data for this period
                                 </div>
                             )}
                         </div>

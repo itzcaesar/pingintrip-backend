@@ -160,6 +160,99 @@ let VehiclesService = class VehiclesService {
             orderBy: { brand: 'asc' },
         });
     }
+    async updateOdometer(id, odometer) {
+        await this.findOne(id);
+        return this.prisma.vehicle.update({
+            where: { id },
+            data: { odometer },
+        });
+    }
+    async getMaintenance(id) {
+        await this.findOne(id);
+        return this.prisma.vehicleMaintenance.findMany({
+            where: { vehicleId: id },
+            orderBy: { createdAt: 'desc' },
+        });
+    }
+    async addMaintenance(id, dto) {
+        await this.findOne(id);
+        return this.prisma.vehicleMaintenance.create({
+            data: {
+                vehicleId: id,
+                type: dto.type,
+                description: dto.description,
+                dueAtKm: dto.dueAtKm,
+                dueDate: dto.dueDate ? new Date(dto.dueDate) : null,
+                cost: dto.cost || 0,
+                notes: dto.notes,
+            },
+        });
+    }
+    async updateMaintenance(vehicleId, maintenanceId, dto) {
+        await this.findOne(vehicleId);
+        const data = {};
+        if (dto.completedAt)
+            data.completedAt = new Date(dto.completedAt);
+        if (dto.cost !== undefined)
+            data.cost = dto.cost;
+        if (dto.notes !== undefined)
+            data.notes = dto.notes;
+        const maintenance = await this.prisma.vehicleMaintenance.findUnique({
+            where: { id: maintenanceId },
+        });
+        if (dto.completedAt && maintenance) {
+            const vehicle = await this.prisma.vehicle.findUnique({ where: { id: vehicleId } });
+            if (vehicle) {
+                if (maintenance.type === 'OIL_CHANGE') {
+                    await this.prisma.vehicle.update({
+                        where: { id: vehicleId },
+                        data: { lastOilChangeKm: vehicle.odometer },
+                    });
+                }
+                else if (maintenance.type === 'COOLANT') {
+                    await this.prisma.vehicle.update({
+                        where: { id: vehicleId },
+                        data: { lastCoolantKm: vehicle.odometer },
+                    });
+                }
+            }
+        }
+        return this.prisma.vehicleMaintenance.update({
+            where: { id: maintenanceId },
+            data,
+        });
+    }
+    async deleteMaintenance(vehicleId, maintenanceId) {
+        await this.findOne(vehicleId);
+        await this.prisma.vehicleMaintenance.delete({
+            where: { id: maintenanceId },
+        });
+        return { message: 'Maintenance record deleted' };
+    }
+    async getImages(id) {
+        await this.findOne(id);
+        return this.prisma.vehicleImage.findMany({
+            where: { vehicleId: id },
+            orderBy: { createdAt: 'desc' },
+        });
+    }
+    async addImage(id, dto) {
+        await this.findOne(id);
+        return this.prisma.vehicleImage.create({
+            data: {
+                vehicleId: id,
+                url: dto.url,
+                isPrimary: dto.isPrimary || false,
+            },
+        });
+    }
+    async removeImage(vehicleId, imageId) {
+        await this.findOne(vehicleId);
+        await this.prisma.vehicleImage.delete({
+            where: { id: imageId },
+        });
+        return { message: 'Image removed' };
+    }
 };
 exports.VehiclesService = VehiclesService;
 exports.VehiclesService = VehiclesService = __decorate([

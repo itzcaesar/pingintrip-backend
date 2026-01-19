@@ -12,53 +12,60 @@ export declare class GpsService {
         locationId: string;
     }>;
     getAllVehicleLocations(): Promise<{
+        id: string;
         vehicleId: string;
-        plateNumber: string;
-        brand: string;
-        model: string;
-        status: import("@prisma/client").$Enums.VehicleStatus;
-        location: {
-            latitude: number;
-            longitude: number;
-            speed: number | null;
-            timestamp: Date;
-        } | null;
+        latitude: number;
+        longitude: number;
+        speed: number;
+        heading: number;
+        vehicle: {
+            id: string;
+            brand: string;
+            model: string;
+            plateNumber: string;
+            type: import("@prisma/client").$Enums.VehicleType;
+        };
     }[]>;
     getVehicleLocationHistory(vehicleId: string, limit?: number): Promise<{
         vehicle: {
             gpsDevice: {
                 id: string;
-                createdAt: Date;
                 deviceId: string;
+                createdAt: Date;
             } | null;
         } & {
             id: string;
             createdAt: Date;
-            updatedAt: Date;
-            notes: string | null;
-            status: import("@prisma/client").$Enums.VehicleStatus;
-            deletedAt: Date | null;
             type: import("@prisma/client").$Enums.VehicleType;
             brand: string;
             model: string;
             plateNumber: string;
             capacity: number;
             dailyRate: number;
+            status: import("@prisma/client").$Enums.VehicleStatus;
             gpsDeviceId: string | null;
+            notes: string | null;
+            odometer: number;
+            oilChangeKm: number;
+            coolantChangeKm: number;
+            lastOilChangeKm: number;
+            lastCoolantKm: number;
+            updatedAt: Date;
+            deletedAt: Date | null;
         };
         locations: {
             id: string;
-            deviceId: string;
-            timestamp: Date;
             latitude: number;
             longitude: number;
             speed: number | null;
+            timestamp: Date;
+            deviceId: string;
         }[];
     }>;
     createDevice(dto: CreateGpsDeviceDto): Promise<{
         id: string;
-        createdAt: Date;
         deviceId: string;
+        createdAt: Date;
     }>;
     listDevices(): Promise<({
         vehicle: {
@@ -69,15 +76,19 @@ export declare class GpsService {
         } | null;
         locations: {
             id: string;
-            deviceId: string;
-            timestamp: Date;
             latitude: number;
             longitude: number;
             speed: number | null;
+            timestamp: Date;
+            deviceId: string;
         }[];
     } & {
         id: string;
-        createdAt: Date;
         deviceId: string;
+        createdAt: Date;
     })[]>;
+    simulateMovement(): Promise<{
+        message: string;
+        updates: any[];
+    }>;
 }

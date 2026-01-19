@@ -5,15 +5,15 @@ export declare class SearchController {
     search(query: string): Promise<{
         bookings: {
             id: string;
-            customerName: string;
             phone: string;
+            customerName: string;
             pickupDate: Date;
             status: import("@prisma/client").$Enums.BookingStatus;
         }[];
         vehicles: {
             id: string;
-            status: import("@prisma/client").$Enums.VehicleStatus;
             type: import("@prisma/client").$Enums.VehicleType;
+            status: import("@prisma/client").$Enums.VehicleStatus;
             brand: string;
             model: string;
             plateNumber: string;

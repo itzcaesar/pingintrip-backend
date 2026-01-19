@@ -55,6 +55,7 @@ type BookingFormValues = z.infer<typeof bookingFormSchema>;
 interface BookingFormModalProps {
     open: boolean;
     onOpenChange: (open: boolean) => void;
+    initialDate?: Date;
 }
 
 const defaultValues: Partial<BookingFormValues> = {
@@ -67,7 +68,7 @@ const defaultValues: Partial<BookingFormValues> = {
     source: "MANUAL",
 };
 
-export function BookingFormModal({ open, onOpenChange }: BookingFormModalProps) {
+export function BookingFormModal({ open, onOpenChange, initialDate }: BookingFormModalProps) {
     const queryClient = useQueryClient();
     const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -79,7 +80,10 @@ export function BookingFormModal({ open, onOpenChange }: BookingFormModalProps) 
     // Reset form when opening
     const handleOpenChange = (newOpen: boolean) => {
         if (newOpen) {
-            form.reset(defaultValues);
+            form.reset({
+                ...defaultValues,
+                pickupDate: initialDate || new Date(),
+            });
         }
         onOpenChange(newOpen);
     };

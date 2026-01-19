@@ -38,6 +38,9 @@ let GpsController = class GpsController {
     listDevices() {
         return this.gpsService.listDevices();
     }
+    simulateMovement() {
+        return this.gpsService.simulateMovement();
+    }
 };
 exports.GpsController = GpsController;
 __decorate([
@@ -80,6 +83,14 @@ __decorate([
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", void 0)
 ], GpsController.prototype, "listDevices", null);
+__decorate([
+    (0, common_1.Post)('simulate'),
+    (0, common_1.UseGuards)(auth_1.JwtAuthGuard, auth_1.RolesGuard),
+    (0, auth_1.Roles)(client_1.Role.ADMIN),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", void 0)
+], GpsController.prototype, "simulateMovement", null);
 exports.GpsController = GpsController = __decorate([
     (0, common_1.Controller)('gps'),
     __metadata("design:paramtypes", [gps_service_1.GpsService])

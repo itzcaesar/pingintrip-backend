@@ -11,28 +11,33 @@ export declare class BookingsService {
     create(createBookingDto: CreateBookingDto, userId?: string): Promise<{
         assignedVehicle: {
             id: string;
+            type: import("@prisma/client").$Enums.VehicleType;
+            createdAt: Date;
             notes: string | null;
             status: import("@prisma/client").$Enums.VehicleStatus;
-            createdAt: Date;
             updatedAt: Date;
             deletedAt: Date | null;
-            type: import("@prisma/client").$Enums.VehicleType;
             brand: string;
             model: string;
             plateNumber: string;
             capacity: number;
             dailyRate: number;
             gpsDeviceId: string | null;
+            odometer: number;
+            oilChangeKm: number;
+            coolantChangeKm: number;
+            lastOilChangeKm: number;
+            lastCoolantKm: number;
         } | null;
         assignedDriver: {
             id: string;
+            createdAt: Date;
+            name: string;
             phone: string;
             notes: string | null;
             status: import("@prisma/client").$Enums.DriverStatus;
-            createdAt: Date;
             updatedAt: Date;
             deletedAt: Date | null;
-            name: string;
             role: import("@prisma/client").$Enums.DriverRole;
         } | null;
         history: {
@@ -45,6 +50,7 @@ export declare class BookingsService {
         }[];
     } & {
         id: string;
+        createdAt: Date;
         customerName: string;
         phone: string;
         source: import("@prisma/client").$Enums.BookingSource;
@@ -56,7 +62,6 @@ export declare class BookingsService {
         notes: string | null;
         totalPrice: number;
         status: import("@prisma/client").$Enums.BookingStatus;
-        createdAt: Date;
         updatedAt: Date;
         deletedAt: Date | null;
         assignedVehicleId: string | null;
@@ -66,28 +71,33 @@ export declare class BookingsService {
     findOne(id: string): Promise<{
         assignedVehicle: {
             id: string;
+            type: import("@prisma/client").$Enums.VehicleType;
+            createdAt: Date;
             notes: string | null;
             status: import("@prisma/client").$Enums.VehicleStatus;
-            createdAt: Date;
             updatedAt: Date;
             deletedAt: Date | null;
-            type: import("@prisma/client").$Enums.VehicleType;
             brand: string;
             model: string;
             plateNumber: string;
             capacity: number;
             dailyRate: number;
             gpsDeviceId: string | null;
+            odometer: number;
+            oilChangeKm: number;
+            coolantChangeKm: number;
+            lastOilChangeKm: number;
+            lastCoolantKm: number;
         } | null;
         assignedDriver: {
             id: string;
+            createdAt: Date;
+            name: string;
             phone: string;
             notes: string | null;
             status: import("@prisma/client").$Enums.DriverStatus;
-            createdAt: Date;
             updatedAt: Date;
             deletedAt: Date | null;
-            name: string;
             role: import("@prisma/client").$Enums.DriverRole;
         } | null;
         history: {
@@ -100,6 +110,7 @@ export declare class BookingsService {
         }[];
     } & {
         id: string;
+        createdAt: Date;
         customerName: string;
         phone: string;
         source: import("@prisma/client").$Enums.BookingSource;
@@ -111,7 +122,6 @@ export declare class BookingsService {
         notes: string | null;
         totalPrice: number;
         status: import("@prisma/client").$Enums.BookingStatus;
-        createdAt: Date;
         updatedAt: Date;
         deletedAt: Date | null;
         assignedVehicleId: string | null;
@@ -120,28 +130,33 @@ export declare class BookingsService {
     update(id: string, updateBookingDto: UpdateBookingDto, userId?: string): Promise<{
         assignedVehicle: {
             id: string;
+            type: import("@prisma/client").$Enums.VehicleType;
+            createdAt: Date;
             notes: string | null;
             status: import("@prisma/client").$Enums.VehicleStatus;
-            createdAt: Date;
             updatedAt: Date;
             deletedAt: Date | null;
-            type: import("@prisma/client").$Enums.VehicleType;
             brand: string;
             model: string;
             plateNumber: string;
             capacity: number;
             dailyRate: number;
             gpsDeviceId: string | null;
+            odometer: number;
+            oilChangeKm: number;
+            coolantChangeKm: number;
+            lastOilChangeKm: number;
+            lastCoolantKm: number;
         } | null;
         assignedDriver: {
             id: string;
+            createdAt: Date;
+            name: string;
             phone: string;
             notes: string | null;
             status: import("@prisma/client").$Enums.DriverStatus;
-            createdAt: Date;
             updatedAt: Date;
             deletedAt: Date | null;
-            name: string;
             role: import("@prisma/client").$Enums.DriverRole;
         } | null;
         history: {
@@ -154,6 +169,7 @@ export declare class BookingsService {
         }[];
     } & {
         id: string;
+        createdAt: Date;
         customerName: string;
         phone: string;
         source: import("@prisma/client").$Enums.BookingSource;
@@ -165,7 +181,6 @@ export declare class BookingsService {
         notes: string | null;
         totalPrice: number;
         status: import("@prisma/client").$Enums.BookingStatus;
-        createdAt: Date;
         updatedAt: Date;
         deletedAt: Date | null;
         assignedVehicleId: string | null;
@@ -174,28 +189,33 @@ export declare class BookingsService {
     updateStatus(id: string, statusDto: UpdateBookingStatusDto, userId?: string): Promise<{
         assignedVehicle: {
             id: string;
+            type: import("@prisma/client").$Enums.VehicleType;
+            createdAt: Date;
             notes: string | null;
             status: import("@prisma/client").$Enums.VehicleStatus;
-            createdAt: Date;
             updatedAt: Date;
             deletedAt: Date | null;
-            type: import("@prisma/client").$Enums.VehicleType;
             brand: string;
             model: string;
             plateNumber: string;
             capacity: number;
             dailyRate: number;
             gpsDeviceId: string | null;
+            odometer: number;
+            oilChangeKm: number;
+            coolantChangeKm: number;
+            lastOilChangeKm: number;
+            lastCoolantKm: number;
         } | null;
         assignedDriver: {
             id: string;
+            createdAt: Date;
+            name: string;
             phone: string;
             notes: string | null;
             status: import("@prisma/client").$Enums.DriverStatus;
-            createdAt: Date;
             updatedAt: Date;
             deletedAt: Date | null;
-            name: string;
             role: import("@prisma/client").$Enums.DriverRole;
         } | null;
         history: {
@@ -208,6 +228,7 @@ export declare class BookingsService {
         }[];
     } & {
         id: string;
+        createdAt: Date;
         customerName: string;
         phone: string;
         source: import("@prisma/client").$Enums.BookingSource;
@@ -219,7 +240,6 @@ export declare class BookingsService {
         notes: string | null;
         totalPrice: number;
         status: import("@prisma/client").$Enums.BookingStatus;
-        createdAt: Date;
         updatedAt: Date;
         deletedAt: Date | null;
         assignedVehicleId: string | null;

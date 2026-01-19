@@ -41,6 +41,30 @@ let VehiclesController = class VehiclesController {
     remove(id) {
         return this.vehiclesService.remove(id);
     }
+    updateOdometer(id, dto) {
+        return this.vehiclesService.updateOdometer(id, dto.odometer);
+    }
+    getMaintenance(id) {
+        return this.vehiclesService.getMaintenance(id);
+    }
+    addMaintenance(id, dto) {
+        return this.vehiclesService.addMaintenance(id, dto);
+    }
+    updateMaintenance(id, maintenanceId, dto) {
+        return this.vehiclesService.updateMaintenance(id, maintenanceId, dto);
+    }
+    deleteMaintenance(id, maintenanceId) {
+        return this.vehiclesService.deleteMaintenance(id, maintenanceId);
+    }
+    getImages(id) {
+        return this.vehiclesService.getImages(id);
+    }
+    addImage(id, dto) {
+        return this.vehiclesService.addImage(id, dto);
+    }
+    removeImage(id, imageId) {
+        return this.vehiclesService.removeImage(id, imageId);
+    }
 };
 exports.VehiclesController = VehiclesController;
 __decorate([
@@ -89,6 +113,75 @@ __decorate([
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", void 0)
 ], VehiclesController.prototype, "remove", null);
+__decorate([
+    (0, common_1.Patch)(':id/odometer'),
+    (0, auth_1.Roles)(client_1.Role.ADMIN),
+    __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, dto_1.UpdateOdometerDto]),
+    __metadata("design:returntype", void 0)
+], VehiclesController.prototype, "updateOdometer", null);
+__decorate([
+    (0, common_1.Get)(':id/maintenance'),
+    __param(0, (0, common_1.Param)('id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", void 0)
+], VehiclesController.prototype, "getMaintenance", null);
+__decorate([
+    (0, common_1.Post)(':id/maintenance'),
+    (0, auth_1.Roles)(client_1.Role.ADMIN),
+    __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, dto_1.CreateMaintenanceDto]),
+    __metadata("design:returntype", void 0)
+], VehiclesController.prototype, "addMaintenance", null);
+__decorate([
+    (0, common_1.Patch)(':id/maintenance/:maintenanceId'),
+    (0, auth_1.Roles)(client_1.Role.ADMIN),
+    __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Param)('maintenanceId')),
+    __param(2, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, String, dto_1.UpdateMaintenanceDto]),
+    __metadata("design:returntype", void 0)
+], VehiclesController.prototype, "updateMaintenance", null);
+__decorate([
+    (0, common_1.Delete)(':id/maintenance/:maintenanceId'),
+    (0, auth_1.Roles)(client_1.Role.ADMIN),
+    __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Param)('maintenanceId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, String]),
+    __metadata("design:returntype", void 0)
+], VehiclesController.prototype, "deleteMaintenance", null);
+__decorate([
+    (0, common_1.Get)(':id/images'),
+    __param(0, (0, common_1.Param)('id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", void 0)
+], VehiclesController.prototype, "getImages", null);
+__decorate([
+    (0, common_1.Post)(':id/images'),
+    (0, auth_1.Roles)(client_1.Role.ADMIN),
+    __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, dto_1.AddVehicleImageDto]),
+    __metadata("design:returntype", void 0)
+], VehiclesController.prototype, "addImage", null);
+__decorate([
+    (0, common_1.Delete)(':id/images/:imageId'),
+    (0, auth_1.Roles)(client_1.Role.ADMIN),
+    __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Param)('imageId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, String]),
+    __metadata("design:returntype", void 0)
+], VehiclesController.prototype, "removeImage", null);
 exports.VehiclesController = VehiclesController = __decorate([
     (0, common_1.Controller)('vehicles'),
     (0, common_1.UseGuards)(auth_1.JwtAuthGuard, auth_1.RolesGuard),

@@ -38,6 +38,12 @@ let NotificationsService = class NotificationsService {
         });
     }
     async markAsRead(id) {
+        const notification = await this.prisma.notification.findUnique({
+            where: { id },
+        });
+        if (!notification) {
+            throw new common_1.NotFoundException(`Notification with ID ${id} not found`);
+        }
         return this.prisma.notification.update({
             where: { id },
             data: { isRead: true },

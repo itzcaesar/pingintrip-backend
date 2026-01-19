@@ -14,16 +14,21 @@ export declare class VehiclesService {
         id: string;
         createdAt: Date;
         updatedAt: Date;
+        type: import("@prisma/client").$Enums.VehicleType;
         notes: string | null;
         status: import("@prisma/client").$Enums.VehicleStatus;
         deletedAt: Date | null;
-        type: import("@prisma/client").$Enums.VehicleType;
         brand: string;
         model: string;
         plateNumber: string;
         capacity: number;
         dailyRate: number;
         gpsDeviceId: string | null;
+        odometer: number;
+        oilChangeKm: number;
+        coolantChangeKm: number;
+        lastOilChangeKm: number;
+        lastCoolantKm: number;
     }>;
     findAll(queryDto: QueryVehiclesDto): Promise<PaginatedResult<any>>;
     findOne(id: string): Promise<{
@@ -64,16 +69,21 @@ export declare class VehiclesService {
         id: string;
         createdAt: Date;
         updatedAt: Date;
+        type: import("@prisma/client").$Enums.VehicleType;
         notes: string | null;
         status: import("@prisma/client").$Enums.VehicleStatus;
         deletedAt: Date | null;
-        type: import("@prisma/client").$Enums.VehicleType;
         brand: string;
         model: string;
         plateNumber: string;
         capacity: number;
         dailyRate: number;
         gpsDeviceId: string | null;
+        odometer: number;
+        oilChangeKm: number;
+        coolantChangeKm: number;
+        lastOilChangeKm: number;
+        lastCoolantKm: number;
     }>;
     update(id: string, updateVehicleDto: UpdateVehicleDto): Promise<{
         gpsDevice: {
@@ -85,16 +95,21 @@ export declare class VehiclesService {
         id: string;
         createdAt: Date;
         updatedAt: Date;
+        type: import("@prisma/client").$Enums.VehicleType;
         notes: string | null;
         status: import("@prisma/client").$Enums.VehicleStatus;
         deletedAt: Date | null;
-        type: import("@prisma/client").$Enums.VehicleType;
         brand: string;
         model: string;
         plateNumber: string;
         capacity: number;
         dailyRate: number;
         gpsDeviceId: string | null;
+        odometer: number;
+        oilChangeKm: number;
+        coolantChangeKm: number;
+        lastOilChangeKm: number;
+        lastCoolantKm: number;
     }>;
     remove(id: string): Promise<{
         message: string;
@@ -103,15 +118,96 @@ export declare class VehiclesService {
         id: string;
         createdAt: Date;
         updatedAt: Date;
+        type: import("@prisma/client").$Enums.VehicleType;
         notes: string | null;
         status: import("@prisma/client").$Enums.VehicleStatus;
         deletedAt: Date | null;
-        type: import("@prisma/client").$Enums.VehicleType;
         brand: string;
         model: string;
         plateNumber: string;
         capacity: number;
         dailyRate: number;
         gpsDeviceId: string | null;
+        odometer: number;
+        oilChangeKm: number;
+        coolantChangeKm: number;
+        lastOilChangeKm: number;
+        lastCoolantKm: number;
     }[]>;
+    updateOdometer(id: string, odometer: number): Promise<{
+        id: string;
+        createdAt: Date;
+        updatedAt: Date;
+        type: import("@prisma/client").$Enums.VehicleType;
+        notes: string | null;
+        status: import("@prisma/client").$Enums.VehicleStatus;
+        deletedAt: Date | null;
+        brand: string;
+        model: string;
+        plateNumber: string;
+        capacity: number;
+        dailyRate: number;
+        gpsDeviceId: string | null;
+        odometer: number;
+        oilChangeKm: number;
+        coolantChangeKm: number;
+        lastOilChangeKm: number;
+        lastCoolantKm: number;
+    }>;
+    getMaintenance(id: string): Promise<{
+        id: string;
+        createdAt: Date;
+        description: string | null;
+        type: string;
+        notes: string | null;
+        dueAtKm: number | null;
+        dueDate: Date | null;
+        cost: number;
+        completedAt: Date | null;
+        vehicleId: string;
+    }[]>;
+    addMaintenance(id: string, dto: any): Promise<{
+        id: string;
+        createdAt: Date;
+        description: string | null;
+        type: string;
+        notes: string | null;
+        dueAtKm: number | null;
+        dueDate: Date | null;
+        cost: number;
+        completedAt: Date | null;
+        vehicleId: string;
+    }>;
+    updateMaintenance(vehicleId: string, maintenanceId: string, dto: any): Promise<{
+        id: string;
+        createdAt: Date;
+        description: string | null;
+        type: string;
+        notes: string | null;
+        dueAtKm: number | null;
+        dueDate: Date | null;
+        cost: number;
+        completedAt: Date | null;
+        vehicleId: string;
+    }>;
+    deleteMaintenance(vehicleId: string, maintenanceId: string): Promise<{
+        message: string;
+    }>;
+    getImages(id: string): Promise<{
+        id: string;
+        createdAt: Date;
+        url: string;
+        isPrimary: boolean;
+        vehicleId: string;
+    }[]>;
+    addImage(id: string, dto: any): Promise<{
+        id: string;
+        createdAt: Date;
+        url: string;
+        isPrimary: boolean;
+        vehicleId: string;
+    }>;
+    removeImage(vehicleId: string, imageId: string): Promise<{
+        message: string;
+    }>;
 }
