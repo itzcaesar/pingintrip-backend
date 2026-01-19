@@ -68,20 +68,34 @@ export default function MapPage() {
     // Transform GPS data to map format
     useEffect(() => {
         if (gpsVehicles.length > 0) {
-            const transformed: VehicleData[] = gpsVehicles.map((gps) => ({
-                id: gps.id,
-                lat: gps.latitude,
-                lng: gps.longitude,
-                type: (gps.vehicle?.type === "CAR" ? "CAR" : "MOTOR") as VehicleType,
-                name: gps.vehicle ? `${gps.vehicle.brand} ${gps.vehicle.model}` : "Unknown Vehicle",
-                plate: gps.vehicle?.plateNumber || "N/A",
-                rotation: gps.heading || 0,
-                status: (gps.speed && gps.speed > 0) ? "MOVING" : "IDLE",
-                speed: gps.speed || 0,
-                destination: [gps.latitude, gps.longitude] as [number, number],
-                driverName: "N/A",
-                customerName: "N/A",
-            }));
+            const transformed: VehicleData[] = gpsVehicles
+                // Filter out any GPS data with invalid coordinates
+                .filter((gps) =>
+                    gps.latitude != null &&
+                    gps.longitude != null &&
+                    !isNaN(gps.latitude) &&
+                    !isNaN(gps.longitude)
+                )
+                .map((gps) => {
+                    // Properly detect vehicle type - MOTOR is for motorcycles, everything else is CAR
+                    const vType = gps.vehicle?.type;
+                    const displayType: VehicleType = vType === "MOTOR" ? "MOTOR" : "CAR";
+
+                    return {
+                        id: gps.id,
+                        lat: gps.latitude,
+                        lng: gps.longitude,
+                        type: displayType,
+                        name: gps.vehicle ? `${gps.vehicle.brand} ${gps.vehicle.model}` : "Unknown Vehicle",
+                        plate: gps.vehicle?.plateNumber || "N/A",
+                        rotation: gps.heading || 0,
+                        status: (gps.speed && gps.speed > 0) ? "MOVING" : "IDLE",
+                        speed: gps.speed || 0,
+                        destination: [gps.latitude, gps.longitude] as [number, number],
+                        driverName: "N/A",
+                        customerName: "N/A",
+                    };
+                });
             setVehicles(transformed);
         }
     }, [gpsVehicles]);
