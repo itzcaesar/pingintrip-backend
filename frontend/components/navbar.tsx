@@ -44,7 +44,7 @@ const APP_PAGES = [
     { name: "Bookings", href: "/dashboard/bookings", icon: CalendarDays },
     { name: "Vehicles", href: "/dashboard/vehicles", icon: Car },
     { name: "Customers", href: "/dashboard/customers", icon: Users },
-    { name: "GPS Map", href: "/dashboard/gps", icon: Map },
+    { name: "GPS Map", href: "/dashboard/map", icon: Map },
     { name: "Calendar", href: "/dashboard/calendar", icon: CalendarDays },
     { name: "Reports", href: "/dashboard/reports", icon: FileText },
     { name: "Settings", href: "/dashboard/settings", icon: Settings },
