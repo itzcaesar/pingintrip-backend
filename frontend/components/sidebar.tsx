@@ -12,7 +12,8 @@ import {
     CalendarDays,
     BarChart3,
     Settings,
-    LogOut
+    LogOut,
+    MapPin
 } from "lucide-react";
 import Image from "next/image";
 import { useAuthStore } from "@/store/auth-store";
@@ -34,6 +35,11 @@ const routes = [
         label: "Vehicles",
         icon: CarFront,
         href: "/dashboard/vehicles",
+    },
+    {
+        label: "GPS Map",
+        icon: MapPin,
+        href: "/dashboard/map",
     },
     {
         label: "Customers",

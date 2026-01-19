@@ -115,12 +115,12 @@ const columns: ColumnDef<Booking>[] = [
                 }
             };
 
-            // Custom colors matching Dashboard cards
+            // Custom colors matching Dashboard cards with dark mode
             let className = "";
-            if (status === 'CONFIRMED') className = "bg-blue-100 text-blue-700 hover:bg-blue-200 border-none";
-            if (status === 'ON_TRIP') className = "bg-emerald-100 text-emerald-700 hover:bg-emerald-200 border-none";
-            if (status === 'PENDING') className = "bg-yellow-100 text-yellow-700 hover:bg-yellow-200 border-none";
-            if (status === 'COMPLETED') className = "bg-purple-100 text-purple-700 hover:bg-purple-200 border-none";
+            if (status === 'CONFIRMED') className = "bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 hover:bg-blue-200 dark:hover:bg-blue-900/60 border-none";
+            if (status === 'ON_TRIP') className = "bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-200 dark:hover:bg-emerald-900/60 border-none";
+            if (status === 'PENDING') className = "bg-yellow-100 dark:bg-yellow-900/40 text-yellow-700 dark:text-yellow-300 hover:bg-yellow-200 dark:hover:bg-yellow-900/60 border-none";
+            if (status === 'COMPLETED') className = "bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-300 hover:bg-purple-200 dark:hover:bg-purple-900/60 border-none";
 
             return (
                 <Badge variant={status === 'CANCELLED' ? 'destructive' : 'outline'} className={className}>
@@ -186,10 +186,13 @@ export default function BookingsPage() {
     }
 
     return (
-        <div className="p-8 space-y-8">
-            <div className="flex items-center justify-between">
-                <h2 className="text-3xl font-bold tracking-tight">Bookings</h2>
-                {/* Add New Booking Button could go here */}
+        <div className="space-y-6">
+            {/* Page Header */}
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                <div>
+                    <h2 className="text-2xl font-bold tracking-tight text-foreground">Bookings</h2>
+                    <p className="text-muted-foreground">Manage and track all customer bookings.</p>
+                </div>
             </div>
 
             <DataTable columns={columns} data={bookings || []} />
