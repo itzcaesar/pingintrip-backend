@@ -59,8 +59,8 @@ export declare class VehiclesController {
             id: string;
             createdAt: Date;
             updatedAt: Date;
-            customerName: string;
             phone: string;
+            customerName: string;
             source: import("@prisma/client").$Enums.BookingSource;
             vehicleType: import("@prisma/client").$Enums.VehicleType;
             pickupDate: Date;

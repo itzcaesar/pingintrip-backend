@@ -12,6 +12,7 @@ import { DriversModule } from './drivers';
 import { GpsModule } from './gps';
 import { GatewaysModule } from './gateways';
 import { GformModule } from './integrations/gform';
+import { SettingsModule } from './settings/settings.module';
 import { HttpExceptionFilter } from './common/filters';
 
 @Module({
@@ -51,6 +52,7 @@ import { HttpExceptionFilter } from './common/filters';
     VehiclesModule,
     DriversModule,
     GpsModule,
+    SettingsModule, // Added this module
 
     // Integrations
     GformModule,

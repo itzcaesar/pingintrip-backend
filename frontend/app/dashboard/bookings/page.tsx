@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
-import { ArrowUpDown, MoreHorizontal, Eye, RefreshCw, XCircle, Copy, Check } from "lucide-react";
+import { ArrowUpDown, MoreHorizontal, Eye, RefreshCw, XCircle, Copy, Check, Plus } from "lucide-react";
 import { ColumnDef } from "@tanstack/react-table";
 import { toast } from "sonner";
 
@@ -23,6 +23,7 @@ import {
     DropdownMenuSubTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Skeleton } from "@/components/ui/skeleton";
+import { BookingFormModal } from "@/components/booking-form-modal";
 import {
     Dialog,
     DialogContent,
@@ -77,6 +78,7 @@ export default function BookingsPage() {
     const [detailsOpen, setDetailsOpen] = useState(false);
     const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
     const [bookingToCancel, setBookingToCancel] = useState<string | null>(null);
+    const [addModalOpen, setAddModalOpen] = useState(false);
 
     // Fetch bookings
     const { data: bookings, isLoading } = useQuery<Booking[]>({
@@ -296,6 +298,9 @@ export default function BookingsPage() {
                     <h2 className="text-2xl font-bold tracking-tight text-foreground">Bookings</h2>
                     <p className="text-muted-foreground">Manage and track all customer bookings.</p>
                 </div>
+                <Button onClick={() => setAddModalOpen(true)} className="bg-blue-600 hover:bg-blue-700 text-white">
+                    <Plus className="mr-2 h-4 w-4" /> Add Booking
+                </Button>
             </div>
 
             <DataTable columns={columns} data={bookings || []} />
@@ -398,6 +403,11 @@ export default function BookingsPage() {
                 variant="destructive"
                 loading={cancelBookingMutation.isPending}
                 onConfirm={() => bookingToCancel && cancelBookingMutation.mutate(bookingToCancel)}
+            />
+
+            <BookingFormModal
+                open={addModalOpen}
+                onOpenChange={setAddModalOpen}
             />
         </div>
     );

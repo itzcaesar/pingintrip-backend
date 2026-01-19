@@ -1,4 +1,4 @@
-Prgenerator client {
+generator client {
   provider = "prisma-client-js"
 }
 
@@ -177,4 +177,14 @@ model GformImport {
 
   @@index([formId])
   @@map("gform_imports")
+}
+
+model SystemSetting {
+  key       String   @id
+  value     String // JSON string
+  category  String   @default("GENERAL")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("system_settings")
 }

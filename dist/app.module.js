@@ -20,6 +20,7 @@ const drivers_1 = require("./drivers");
 const gps_1 = require("./gps");
 const gateways_1 = require("./gateways");
 const gform_1 = require("./integrations/gform");
+const settings_module_1 = require("./settings/settings.module");
 const filters_1 = require("./common/filters");
 let AppModule = class AppModule {
 };
@@ -55,6 +56,7 @@ exports.AppModule = AppModule = __decorate([
             vehicles_1.VehiclesModule,
             drivers_1.DriversModule,
             gps_1.GpsModule,
+            settings_module_1.SettingsModule,
             gform_1.GformModule,
             gateways_1.GatewaysModule,
         ],

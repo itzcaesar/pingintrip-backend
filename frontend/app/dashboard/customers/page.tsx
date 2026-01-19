@@ -5,8 +5,9 @@ import { useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Users, Search, MoreHorizontal, Mail, Phone, Eye, Calendar } from "lucide-react";
+import { Users, Search, MoreHorizontal, Mail, Phone, Eye, Calendar, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { BookingFormModal } from "@/components/booking-form-modal";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -65,6 +66,7 @@ export default function CustomersPage() {
     const [searchQuery, setSearchQuery] = useState("");
     const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
     const [detailsOpen, setDetailsOpen] = useState(false);
+    const [addCustomerOpen, setAddCustomerOpen] = useState(false);
 
     // Fetch bookings and derive customer data from them
     const { data: bookings = [], isLoading } = useQuery<Booking[]>({
@@ -160,6 +162,9 @@ export default function CustomersPage() {
                     <h2 className="text-2xl font-bold tracking-tight text-foreground">Customers</h2>
                     <p className="text-muted-foreground">Customer insights derived from booking history.</p>
                 </div>
+                <Button onClick={() => setAddCustomerOpen(true)} className="bg-blue-600 hover:bg-blue-700 text-white">
+                    <Plus className="mr-2 h-4 w-4" /> Add Customer
+                </Button>
             </div>
 
             {/* Stats Summary */}
@@ -370,6 +375,11 @@ export default function CustomersPage() {
                     )}
                 </DialogContent>
             </Dialog>
+
+            <BookingFormModal
+                open={addCustomerOpen}
+                onOpenChange={setAddCustomerOpen}
+            />
         </div>
     );
 }

@@ -23,12 +23,13 @@ export class UsersController {
 
     // Current user endpoints - must be before :id routes
     @Get('me')
-    getMe(@Request() req) {
+    getMe(@Request() req: any) {
         return this.usersService.findOne(req.user.id);
     }
 
     @Patch('me')
-    updateMe(@Request() req, @Body() updateUserDto: UpdateUserDto) {
+    updateMe(@Request() req: any, @Body() updateUserDto: UpdateUserDto) {
+        console.log('UpdateMe req.user:', req.user);
         // Prevent non-admins from changing their own role
         if (req.user.role !== Role.ADMIN) {
             delete updateUserDto.role;

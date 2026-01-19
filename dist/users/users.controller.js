@@ -28,6 +28,7 @@ let UsersController = class UsersController {
         return this.usersService.findOne(req.user.id);
     }
     updateMe(req, updateUserDto) {
+        console.log('UpdateMe req.user:', req.user);
         if (req.user.role !== client_1.Role.ADMIN) {
             delete updateUserDto.role;
         }
