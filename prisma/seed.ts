@@ -218,7 +218,7 @@ async function main() {
     // ========================================================================
     console.log('\n📍 Creating GPS devices...');
     const gpsDevices: GpsDevice[] = [];
-    for (let i = 1; i <= 23; i++) {  // 23 devices for 23 vehicles
+    for (let i = 1; i <= 26; i++) {  // 26 devices for 26 vehicles (15 cars + 8 motors + 3 vans)
         const device = await prisma.gpsDevice.create({
             data: {
                 deviceId: `GPS-${String(i).padStart(3, '0')}`,
