@@ -56,4 +56,11 @@ export class GpsController {
     listDevices() {
         return this.gpsService.listDevices();
     }
+
+    @Post('simulate')
+    @UseGuards(JwtAuthGuard, RolesGuard)
+    @Roles(Role.ADMIN)
+    simulateMovement() {
+        return this.gpsService.simulateMovement();
+    }
 }

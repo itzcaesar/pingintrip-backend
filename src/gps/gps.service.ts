@@ -83,24 +83,27 @@ export class GpsService {
             },
         });
 
-        return vehicles.map((vehicle) => {
-            const lastLocation = vehicle.gpsDevice?.locations[0];
-            return {
-                vehicleId: vehicle.id,
-                plateNumber: vehicle.plateNumber,
-                brand: vehicle.brand,
-                model: vehicle.model,
-                status: vehicle.status,
-                location: lastLocation
-                    ? {
-                        latitude: lastLocation.latitude,
-                        longitude: lastLocation.longitude,
-                        speed: lastLocation.speed,
-                        timestamp: lastLocation.timestamp,
-                    }
-                    : null,
-            };
-        });
+        // Return flat structure that frontend expects
+        return vehicles
+            .filter((vehicle) => vehicle.gpsDevice?.locations[0]) // Only vehicles with GPS data
+            .map((vehicle) => {
+                const lastLocation = vehicle.gpsDevice!.locations[0];
+                return {
+                    id: lastLocation.id,
+                    vehicleId: vehicle.id,
+                    latitude: lastLocation.latitude,
+                    longitude: lastLocation.longitude,
+                    speed: lastLocation.speed || 0,
+                    heading: Math.floor(Math.random() * 360), // Simulated heading
+                    vehicle: {
+                        id: vehicle.id,
+                        brand: vehicle.brand,
+                        model: vehicle.model,
+                        plateNumber: vehicle.plateNumber,
+                        type: vehicle.type,
+                    },
+                };
+            });
     }
 
     async getVehicleLocationHistory(vehicleId: string, limit = 100) {
@@ -153,5 +156,70 @@ export class GpsService {
             },
             orderBy: { createdAt: 'desc' },
         });
+    }
+
+    // Simulate vehicle movement - creates new GPS locations with slight position changes
+    async simulateMovement() {
+        const devices = await this.prisma.gpsDevice.findMany({
+            include: {
+                vehicle: true,
+                locations: {
+                    orderBy: { timestamp: 'desc' },
+                    take: 1,
+                },
+            },
+        });
+
+        const updates: any[] = [];
+
+        for (const device of devices) {
+            if (!device.vehicle || device.locations.length === 0) continue;
+
+            const lastLocation = device.locations[0];
+
+            // Random movement: 0.0005-0.002 degrees (~50-200m)
+            const movement = 0.0005 + Math.random() * 0.0015;
+            const direction = Math.random() * 2 * Math.PI;
+
+            const newLat = lastLocation.latitude + Math.sin(direction) * movement;
+            const newLng = lastLocation.longitude + Math.cos(direction) * movement;
+
+            // Keep within Lombok bounds
+            const clampedLat = Math.max(-8.95, Math.min(-8.3, newLat));
+            const clampedLng = Math.max(116.0, Math.min(116.5, newLng));
+
+            const location = await this.prisma.gpsLocation.create({
+                data: {
+                    deviceId: device.id,
+                    latitude: clampedLat,
+                    longitude: clampedLng,
+                    speed: 10 + Math.random() * 50, // 10-60 km/h
+                    timestamp: new Date(),
+                },
+            });
+
+            updates.push({
+                vehicleId: device.vehicle.id,
+                plateNumber: device.vehicle.plateNumber,
+                latitude: clampedLat,
+                longitude: clampedLng,
+                speed: location.speed,
+            });
+
+            // Emit realtime update
+            this.dashboardGateway.emitVehicleLocationUpdated({
+                vehicleId: device.vehicle.id,
+                plateNumber: device.vehicle.plateNumber,
+                latitude: clampedLat,
+                longitude: clampedLng,
+                speed: location.speed ?? undefined,
+                timestamp: location.timestamp,
+            });
+        }
+
+        return {
+            message: `Updated ${updates.length} vehicle positions`,
+            updates,
+        };
     }
 }
