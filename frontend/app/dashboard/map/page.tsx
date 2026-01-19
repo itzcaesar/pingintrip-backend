@@ -1,10 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import dynamic from "next/dynamic";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
-import { Navigation, Radio } from "lucide-react";
+import { Navigation, Radio, MapPin } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
+import api from "@/lib/api";
 
 // Dynamically import Map to avoid SSR issues with Leaflet
 const DashboardMap = dynamic(() => import("@/components/dashboard-map"), {
@@ -17,6 +20,22 @@ const DashboardMap = dynamic(() => import("@/components/dashboard-map"), {
 });
 
 type VehicleType = "CAR" | "MOTOR";
+
+interface GpsVehicle {
+    id: string;
+    vehicleId: string;
+    latitude: number;
+    longitude: number;
+    speed?: number;
+    heading?: number;
+    vehicle?: {
+        id: string;
+        brand: string;
+        model: string;
+        plateNumber: string;
+        type: string;
+    };
+}
 
 interface VehicleData {
     id: string;
@@ -33,99 +52,82 @@ interface VehicleData {
     customerName: string;
 }
 
-// Simulation Data Generators
-const generateRandomPoint = (center: [number, number], radius: number): [number, number] => {
-    const y0 = center[0];
-    const x0 = center[1];
-    const rd = radius / 111300; // about 111300 meters in one degree
-
-    const u = Math.random();
-    const v = Math.random();
-
-    const w = rd * Math.sqrt(u);
-    const t = 2 * Math.PI * v;
-    const x = w * Math.cos(t);
-    const y = w * Math.sin(t);
-
-    return [y + y0, x + x0];
-};
-
 export default function MapPage() {
     const [vehicles, setVehicles] = useState<VehicleData[]>([]);
 
-    // Initialize Simulation
+    // Fetch GPS vehicle data from API
+    const { data: gpsVehicles = [], isLoading } = useQuery<GpsVehicle[]>({
+        queryKey: ["gps-vehicles"],
+        queryFn: async () => {
+            const res = await api.get("/gps/vehicles");
+            return Array.isArray(res.data) ? res.data : (res.data?.data || []);
+        },
+        refetchInterval: 5000, // Refresh every 5 seconds for live updates
+    });
+
+    // Transform GPS data to map format
     useEffect(() => {
-        const initialVehicles: VehicleData[] = [
-            { id: "v1", lat: -8.583, lng: 116.116, type: "CAR", name: "Toyota Avanza", plate: "DR 1234 AB", rotation: 0, status: "MOVING", speed: 0.0005, destination: generateRandomPoint([-8.583, 116.116], 5000), driverName: "Budi Santoso", customerName: "John Doe" }, // Mataram
-            { id: "v2", lat: -8.500, lng: 116.050, type: "CAR", name: "Innova Zenix", plate: "DR 8888 XY", rotation: 45, status: "MOVING", speed: 0.0007, destination: generateRandomPoint([-8.500, 116.050], 5000), driverName: "Ahmad Dani", customerName: "Sarah Smith" }, // Senggigi
-            { id: "v3", lat: -8.890, lng: 116.280, type: "MOTOR", name: "Honda PCX", plate: "DR 4545 ZZ", rotation: 90, status: "MOVING", speed: 0.0008, destination: generateRandomPoint([-8.890, 116.280], 3000), driverName: "Self-Drive", customerName: "Mike Johnson" }, // Mandalika
-            { id: "v4", lat: -8.700, lng: 116.250, type: "MOTOR", name: "NMAX Turbo", plate: "DR 9900 ST", rotation: 180, status: "IDLE", speed: 0, destination: [-8.700, 116.250], driverName: "Self-Drive", customerName: "Available" }, // Praya
-            { id: "v5", lat: -8.350, lng: 116.150, type: "CAR", name: "Suzuki Jimny", plate: "DR 7777 AA", rotation: 270, status: "MOVING", speed: 0.0004, destination: generateRandomPoint([-8.350, 116.150], 4000), driverName: "Wayan Gede", customerName: "Family Trip" }, // North Lombok
-        ];
-        setVehicles(initialVehicles);
-    }, []);
-
-    // Simulation Loop
-    useEffect(() => {
-        const interval = setInterval(() => {
-            setVehicles(prev => prev.map(v => {
-                if (v.status === "IDLE") return v;
-
-                const dx = v.destination[1] - v.lng;
-                const dy = v.destination[0] - v.lat;
-                const distance = Math.sqrt(dx * dx + dy * dy);
-
-                if (distance < 0.001) {
-                    // Reached destination, pick new one
-                    const newDest = generateRandomPoint([-8.583, 116.116], 20000); // Correct Lombok Center
-                    return { ...v, destination: newDest };
-                }
-
-                const angle = Math.atan2(dy, dx);
-                const moveDist = v.speed;
-
-                const newLat = v.lat + Math.sin(angle) * moveDist;
-                const newLng = v.lng + Math.cos(angle) * moveDist;
-                const rotation = (angle * 180 / Math.PI) + 90; // Leaflet rotation fix
-
-                return {
-                    ...v,
-                    lat: newLat,
-                    lng: newLng,
-                    rotation: rotation
-                };
+        if (gpsVehicles.length > 0) {
+            const transformed: VehicleData[] = gpsVehicles.map((gps) => ({
+                id: gps.id,
+                lat: gps.latitude,
+                lng: gps.longitude,
+                type: (gps.vehicle?.type === "CAR" ? "CAR" : "MOTOR") as VehicleType,
+                name: gps.vehicle ? `${gps.vehicle.brand} ${gps.vehicle.model}` : "Unknown Vehicle",
+                plate: gps.vehicle?.plateNumber || "N/A",
+                rotation: gps.heading || 0,
+                status: (gps.speed && gps.speed > 0) ? "MOVING" : "IDLE",
+                speed: gps.speed || 0,
+                destination: [gps.latitude, gps.longitude] as [number, number],
+                driverName: "N/A",
+                customerName: "N/A",
             }));
-        }, 100); // 20 FPS roughly
+            setVehicles(transformed);
+        }
+    }, [gpsVehicles]);
 
-        return () => clearInterval(interval);
-    }, []);
+    if (isLoading) {
+        return (
+            <div className="h-[calc(100vh-6rem)] w-full p-6 relative">
+                <Skeleton className="h-full w-full rounded-2xl" />
+            </div>
+        );
+    }
 
     return (
         <div className="h-[calc(100vh-6rem)] w-full p-6 relative">
             <div className="absolute top-10 left-10 z-10 space-y-4 max-w-sm pointer-events-none">
-                <Card className="bg-white/80 backdrop-blur-md border-white/40 shadow-xl pointer-events-auto p-4">
+                <Card className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-white/40 dark:border-slate-700 shadow-xl pointer-events-auto p-4">
                     <div className="flex items-center gap-3 mb-2">
-                        <div className="p-2 bg-blue-100 rounded-lg text-blue-600">
+                        <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg text-blue-600 dark:text-blue-400">
                             <Navigation className="h-5 w-5" />
                         </div>
                         <div>
-                            <h2 className="font-bold text-slate-800">Fleet Monitor</h2>
-                            <p className="text-xs text-slate-500">Live Simulation • Lombok, ID</p>
+                            <h2 className="font-bold text-slate-800 dark:text-foreground">Fleet Monitor</h2>
+                            <p className="text-xs text-slate-500 dark:text-muted-foreground">Live GPS Tracking • Lombok, ID</p>
                         </div>
                     </div>
                     <div className="flex gap-2 mt-4">
-                        <Badge variant="outline" className="bg-emerald-50 text-emerald-700 border-emerald-200">
+                        <Badge variant="outline" className="bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800">
                             <Radio className="h-3 w-3 mr-1 animate-pulse" /> {vehicles.filter(v => v.status === "MOVING").length} Active
                         </Badge>
-                        <Badge variant="outline" className="bg-slate-50 text-slate-600">
+                        <Badge variant="outline" className="bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-muted-foreground">
                             {vehicles.filter(v => v.status === "IDLE").length} Idle
                         </Badge>
                     </div>
                 </Card>
             </div>
 
-            <Card className="h-full w-full overflow-hidden border-white/20 shadow-2xl bg-white/30 backdrop-blur-sm rounded-2xl relative z-0">
-                <DashboardMap vehicles={vehicles} />
+            <Card className="h-full w-full overflow-hidden border-white/20 dark:border-slate-700 shadow-2xl bg-white/30 dark:bg-slate-900/30 backdrop-blur-sm rounded-2xl relative z-0">
+                {vehicles.length > 0 ? (
+                    <DashboardMap vehicles={vehicles} />
+                ) : (
+                    <div className="h-full w-full flex flex-col items-center justify-center text-muted-foreground">
+                        <MapPin className="h-12 w-12 mb-4 opacity-50" />
+                        <p className="font-medium">No GPS Data Available</p>
+                        <p className="text-sm">Vehicles with GPS devices will appear here</p>
+                    </div>
+                )}
             </Card>
         </div>
     );

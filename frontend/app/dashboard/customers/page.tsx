@@ -70,7 +70,7 @@ export default function CustomersPage() {
     const { data: bookings = [], isLoading } = useQuery<Booking[]>({
         queryKey: ["all-bookings-for-customers"],
         queryFn: async () => {
-            const res = await api.get("/bookings?limit=500");
+            const res = await api.get("/bookings?limit=100");
             return Array.isArray(res.data) ? res.data : (res.data?.data || []);
         },
     });
