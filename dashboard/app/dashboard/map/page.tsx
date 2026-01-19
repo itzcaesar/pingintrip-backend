@@ -157,9 +157,9 @@ export default function MapPage() {
                         destinationsRef.current.set(vehicle.id, dest);
                     }
 
-                    // Move toward destination (speed varies by vehicle type)
-                    const baseSpeed = vehicle.type === "MOTOR" ? 0.0008 : 0.0012;
-                    const speed = baseSpeed + Math.random() * 0.0004;
+                    // Move toward destination (smaller steps for smoother animation)
+                    const baseSpeed = vehicle.type === "MOTOR" ? 0.00015 : 0.00025;
+                    const speed = baseSpeed + Math.random() * 0.00005;
 
                     // Normalize direction
                     const newLat = vehicle.lat + (distLat / distance) * speed;
@@ -168,8 +168,8 @@ export default function MapPage() {
                     // Calculate new heading
                     const newRotation = calculateHeading(vehicle.lat, vehicle.lng, newLat, newLng);
 
-                    // Random chance to go idle (5%)
-                    const isMoving = Math.random() > 0.05;
+                    // Random chance to go idle (1% per tick)
+                    const isMoving = Math.random() > 0.01;
 
                     return {
                         ...vehicle,
@@ -183,8 +183,8 @@ export default function MapPage() {
             );
         };
 
-        // Update positions every 2 seconds
-        animationRef.current = setInterval(moveVehicles, 2000);
+        // Update positions every 300ms for smooth animation
+        animationRef.current = setInterval(moveVehicles, 300);
 
         return () => {
             if (animationRef.current) {
