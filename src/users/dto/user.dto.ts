@@ -41,6 +41,10 @@ export class UpdateUserDto {
     name?: string;
 
     @IsOptional()
+    @IsString()
+    phone?: string;
+
+    @IsOptional()
     @IsEnum(Role)
     role?: Role;
 

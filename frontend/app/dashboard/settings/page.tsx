@@ -37,6 +37,7 @@ import { useAuthStore } from "@/store/auth-store";
 const profileSchema = z.object({
     name: z.string().min(1, "Name is required"),
     email: z.string().email("Invalid email"),
+    phone: z.string().optional(),
 });
 
 const passwordSchema = z.object({
@@ -74,8 +75,9 @@ export default function SettingsPage() {
     const profileForm = useForm({
         resolver: zodResolver(profileSchema) as any,
         defaultValues: {
-            name: user?.name || "Admin User",
-            email: user?.email || "admin@pingintrip.com",
+            name: user?.name || "",
+            email: user?.email || "",
+            phone: "",
         },
     });
 
@@ -233,6 +235,19 @@ export default function SettingsPage() {
                                             <FormLabel className="text-foreground">Email Address</FormLabel>
                                             <FormControl>
                                                 <Input {...field} className="bg-muted border-border" />
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                                <FormField
+                                    control={profileForm.control}
+                                    name="phone"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel className="text-foreground">Phone Number</FormLabel>
+                                            <FormControl>
+                                                <Input {...field} placeholder="+62 812-XXX-XXXX" className="bg-muted border-border" />
                                             </FormControl>
                                             <FormMessage />
                                         </FormItem>

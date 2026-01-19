@@ -24,6 +24,15 @@ let UsersController = class UsersController {
     constructor(usersService) {
         this.usersService = usersService;
     }
+    getMe(req) {
+        return this.usersService.findOne(req.user.id);
+    }
+    updateMe(req, updateUserDto) {
+        if (req.user.role !== client_1.Role.ADMIN) {
+            delete updateUserDto.role;
+        }
+        return this.usersService.update(req.user.id, updateUserDto);
+    }
     create(createUserDto) {
         return this.usersService.create(createUserDto);
     }
@@ -44,6 +53,21 @@ let UsersController = class UsersController {
     }
 };
 exports.UsersController = UsersController;
+__decorate([
+    (0, common_1.Get)('me'),
+    __param(0, (0, common_1.Request)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", void 0)
+], UsersController.prototype, "getMe", null);
+__decorate([
+    (0, common_1.Patch)('me'),
+    __param(0, (0, common_1.Request)()),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, dto_1.UpdateUserDto]),
+    __metadata("design:returntype", void 0)
+], UsersController.prototype, "updateMe", null);
 __decorate([
     (0, common_1.Post)(),
     (0, auth_1.Roles)(client_1.Role.ADMIN),

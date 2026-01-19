@@ -9,6 +9,7 @@ export declare class UpdateUserDto {
     email?: string;
     password?: string;
     name?: string;
+    phone?: string;
     role?: Role;
     isActive?: boolean;
 }

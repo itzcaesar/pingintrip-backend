@@ -8,6 +8,7 @@ import {
     Delete,
     UseGuards,
     Query,
+    Request,
 } from '@nestjs/common';
 import { Role } from '@prisma/client';
 import { UsersService } from './users.service';
@@ -19,6 +20,21 @@ import { PaginationDto } from '../common/dto';
 @UseGuards(JwtAuthGuard, RolesGuard)
 export class UsersController {
     constructor(private readonly usersService: UsersService) { }
+
+    // Current user endpoints - must be before :id routes
+    @Get('me')
+    getMe(@Request() req) {
+        return this.usersService.findOne(req.user.id);
+    }
+
+    @Patch('me')
+    updateMe(@Request() req, @Body() updateUserDto: UpdateUserDto) {
+        // Prevent non-admins from changing their own role
+        if (req.user.role !== Role.ADMIN) {
+            delete updateUserDto.role;
+        }
+        return this.usersService.update(req.user.id, updateUserDto);
+    }
 
     @Post()
     @Roles(Role.ADMIN)

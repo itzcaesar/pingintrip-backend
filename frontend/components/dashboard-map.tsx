@@ -69,9 +69,9 @@ export default function DashboardMap({ vehicles }: DashboardMapProps) {
                 url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
             />
 
-            {vehicles.map((v) => (
+            {vehicles.map((v, index) => (
                 <Marker
-                    key={v.id}
+                    key={v.id || `vehicle-${index}`}
                     position={[v.lat, v.lng]}
                     icon={createVehicleIcon(v.type, v.rotation)}
                     eventHandlers={{
