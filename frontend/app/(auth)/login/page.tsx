@@ -23,8 +23,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { User, Lock, MapPin } from "lucide-react";
 import { ThemeToggle } from "@/components/theme-toggle";
 
-const BEACH_BG = "https://images.unsplash.com/photo-1596394516093-501ba68a0ba6?q=80&w=2500&auto=format&fit=crop";
-
 const formSchema = z.object({
     email: z.string().email(),
     password: z.string().min(1, "Password is required"),
@@ -65,115 +63,154 @@ export default function LoginPage() {
     }
 
     return (
-        <div className="min-h-screen relative flex items-center justify-center overflow-hidden bg-background">
+        <div className="min-h-screen flex bg-background">
             {/* Theme Toggle - Top Right */}
             <div className="absolute top-4 right-4 z-20">
                 <ThemeToggle />
             </div>
 
-            {/* Background Image */}
-            <div className="absolute inset-0 z-0">
-                <Image
-                    src={BEACH_BG}
-                    alt="Tropical Beach"
-                    fill
-                    className="object-cover"
-                    priority
-                />
-                <div className="absolute inset-0 bg-black/40 dark:bg-black/60 backdrop-blur-[2px]" />
-            </div>
+            {/* Left Side - Branding */}
+            <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-blue-600 to-blue-800 dark:from-blue-800 dark:to-blue-950 relative overflow-hidden">
+                {/* Decorative Elements */}
+                <div className="absolute inset-0">
+                    <div className="absolute top-20 left-20 w-72 h-72 bg-blue-400/20 rounded-full blur-3xl" />
+                    <div className="absolute bottom-20 right-20 w-96 h-96 bg-blue-300/10 rounded-full blur-3xl" />
+                </div>
 
-            <div className="z-10 w-full max-w-md px-4 animate-in fade-in zoom-in-95 duration-700">
-
-                {/* Logo Header */}
-                <div className="flex flex-col items-center mb-8">
-                    <div className="flex items-center gap-4 bg-white/10 dark:bg-white/5 backdrop-blur-md border border-white/20 dark:border-white/10 p-4 rounded-2xl shadow-2xl">
-                        <div className="relative w-14 h-14 rounded-lg overflow-hidden shadow-inner">
+                <div className="relative z-10 flex flex-col justify-center items-center w-full p-12 text-white">
+                    <div className="flex items-center gap-4 mb-8">
+                        <div className="relative w-16 h-16 rounded-xl overflow-hidden bg-white/10 p-2">
                             <Image
                                 src="/brand-logo.png"
                                 alt="Pingintrip Logo"
                                 fill
-                                className="object-cover"
+                                className="object-contain"
                                 priority
                             />
                         </div>
-                        <span className="text-3xl font-bold text-white tracking-tight drop-shadow-md">Pingintrip</span>
+                        <span className="text-4xl font-bold tracking-tight">Pingintrip</span>
                     </div>
-                    <div className="flex items-center gap-1.5 mt-3 text-white/70 text-sm">
-                        <MapPin className="h-4 w-4" />
-                        <span>Lombok, Indonesia</span>
+
+                    <div className="flex items-center gap-2 text-blue-100 mb-8">
+                        <MapPin className="h-5 w-5" />
+                        <span className="text-lg">Lombok, Indonesia</span>
+                    </div>
+
+                    <p className="text-xl text-blue-100 text-center max-w-md leading-relaxed">
+                        Your complete travel management solution for vehicle rentals, bookings, and fleet operations.
+                    </p>
+
+                    <div className="mt-12 grid grid-cols-3 gap-8 text-center">
+                        <div>
+                            <p className="text-3xl font-bold">100+</p>
+                            <p className="text-blue-200 text-sm">Vehicles</p>
+                        </div>
+                        <div>
+                            <p className="text-3xl font-bold">5K+</p>
+                            <p className="text-blue-200 text-sm">Bookings</p>
+                        </div>
+                        <div>
+                            <p className="text-3xl font-bold">24/7</p>
+                            <p className="text-blue-200 text-sm">Support</p>
+                        </div>
                     </div>
                 </div>
+            </div>
 
-                {/* Login Card */}
-                <Card className="border-0 bg-white/10 dark:bg-white/5 backdrop-blur-xl shadow-2xl ring-1 ring-white/20 dark:ring-white/10">
-                    <CardHeader className="space-y-1 text-center">
-                        <CardTitle className="text-2xl font-bold tracking-tight text-white">Admin Access</CardTitle>
-                        <CardDescription className="text-gray-200 dark:text-gray-300">
-                            Enter your credentials to manage Pingintrip
-                        </CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                        <Form {...form}>
-                            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
-                                <FormField
-                                    control={form.control}
-                                    name="email"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel className="text-white/90">Email</FormLabel>
-                                            <FormControl>
-                                                <div className="relative">
-                                                    <User className="absolute left-3 top-2.5 h-5 w-5 text-gray-300" />
-                                                    <Input
-                                                        placeholder="admin@pingintrip.com"
-                                                        {...field}
-                                                        className="pl-10 h-11 bg-white/10 dark:bg-white/5 border-white/20 dark:border-white/10 text-white placeholder:text-gray-400 focus-visible:ring-2 focus-visible:ring-blue-400/50 focus-visible:border-transparent transition-all hover:bg-white/15"
-                                                    />
-                                                </div>
-                                            </FormControl>
-                                            <FormMessage className="text-red-300" />
-                                        </FormItem>
-                                    )}
+            {/* Right Side - Login Form */}
+            <div className="flex-1 flex items-center justify-center p-8">
+                <div className="w-full max-w-md">
+                    {/* Mobile Logo */}
+                    <div className="lg:hidden flex flex-col items-center mb-8">
+                        <div className="flex items-center gap-3 mb-2">
+                            <div className="relative w-10 h-10">
+                                <Image
+                                    src="/brand-logo.png"
+                                    alt="Pingintrip Logo"
+                                    fill
+                                    className="object-contain"
+                                    priority
                                 />
-                                <FormField
-                                    control={form.control}
-                                    name="password"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel className="text-white/90">Password</FormLabel>
-                                            <FormControl>
-                                                <div className="relative">
-                                                    <Lock className="absolute left-3 top-2.5 h-5 w-5 text-gray-300" />
-                                                    <Input
-                                                        type="password"
-                                                        placeholder="••••••••"
-                                                        {...field}
-                                                        className="pl-10 h-11 bg-white/10 dark:bg-white/5 border-white/20 dark:border-white/10 text-white placeholder:text-gray-400 focus-visible:ring-2 focus-visible:ring-blue-400/50 focus-visible:border-transparent transition-all hover:bg-white/15"
-                                                    />
-                                                </div>
-                                            </FormControl>
-                                            <FormMessage className="text-red-300" />
-                                        </FormItem>
-                                    )}
-                                />
-                                <Button
-                                    type="submit"
-                                    className="w-full h-11 bg-blue-600 hover:bg-blue-700 text-white font-bold shadow-lg shadow-blue-600/30 border-none transition-all duration-300 hover:scale-[1.02]"
-                                    disabled={loading}
-                                >
-                                    {loading ? "Authenticating..." : "Sign In to Dashboard"}
-                                </Button>
-                            </form>
-                        </Form>
-                    </CardContent>
-                </Card>
+                            </div>
+                            <span className="text-2xl font-bold text-foreground">Pingintrip</span>
+                        </div>
+                        <div className="flex items-center gap-1.5 text-muted-foreground text-sm">
+                            <MapPin className="h-4 w-4" />
+                            <span>Lombok, Indonesia</span>
+                        </div>
+                    </div>
 
-                <p className="mt-6 text-center text-sm text-white/60">
-                    &copy; {new Date().getFullYear()} Pingintrip. All rights reserved.
-                </p>
+                    {/* Login Card */}
+                    <Card>
+                        <CardHeader className="space-y-1">
+                            <CardTitle className="text-2xl font-bold">Welcome back</CardTitle>
+                            <CardDescription>
+                                Sign in to access your admin dashboard
+                            </CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                            <Form {...form}>
+                                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                                    <FormField
+                                        control={form.control}
+                                        name="email"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>Email</FormLabel>
+                                                <FormControl>
+                                                    <div className="relative">
+                                                        <User className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
+                                                        <Input
+                                                            placeholder="admin@pingintrip.com"
+                                                            {...field}
+                                                            className="pl-10 h-11"
+                                                        />
+                                                    </div>
+                                                </FormControl>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+                                    <FormField
+                                        control={form.control}
+                                        name="password"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>Password</FormLabel>
+                                                <FormControl>
+                                                    <div className="relative">
+                                                        <Lock className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
+                                                        <Input
+                                                            type="password"
+                                                            placeholder="••••••••"
+                                                            {...field}
+                                                            className="pl-10 h-11"
+                                                        />
+                                                    </div>
+                                                </FormControl>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+                                    <Button
+                                        type="submit"
+                                        className="w-full h-11 bg-blue-600 hover:bg-blue-700 text-white font-semibold"
+                                        disabled={loading}
+                                    >
+                                        {loading ? "Signing in..." : "Sign In"}
+                                    </Button>
+                                </form>
+                            </Form>
+                        </CardContent>
+                    </Card>
+
+                    <p className="mt-6 text-center text-sm text-muted-foreground">
+                        &copy; {new Date().getFullYear()} Pingintrip. All rights reserved.
+                    </p>
+                </div>
             </div>
         </div>
     );
 }
+
 

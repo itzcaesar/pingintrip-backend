@@ -16,7 +16,7 @@ export default function DashboardLayout({
             {/* 2. Main Content Area */}
             <div className="flex-1 flex flex-col md:pl-64 min-h-screen transition-all duration-300">
                 {/* 3. Sticky Navbar */}
-                <header className="sticky top-0 z-40 bg-white/80 dark:bg-zinc-900/80 backdrop-blur-md border-b border-zinc-200 dark:border-zinc-800 transition-colors">
+                <header className="sticky top-0 z-40 bg-background border-b border-border transition-colors">
                     <Navbar />
                 </header>
 
