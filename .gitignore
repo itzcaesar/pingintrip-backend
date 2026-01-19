@@ -1,6 +1,17 @@
+# Dependencies
 node_modules
+
+# Environment Variables
 .env
+
+# Generated
 /generated/prisma
+
+# Landing Page
 /pingintrip-landing
-/.vscode
-/coverage
+
+# IDE
+.vscode
+
+# Test coverage
+coverage
