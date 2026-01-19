@@ -49,15 +49,6 @@ type Customer = {
     createdAt: string;
 };
 
-// Fallback mock data when API is not available
-const mockCustomers: Customer[] = [
-    { id: "1", name: "John Doe", email: "john@example.com", phone: "+62 812-3456-7890", location: "Mataram", bookings: 5, totalSpent: 7500000, status: "active", createdAt: "2024-01-15" },
-    { id: "2", name: "Sarah Johnson", email: "sarah@example.com", phone: "+62 813-9876-5432", location: "Senggigi", bookings: 3, totalSpent: 4200000, status: "active", createdAt: "2024-02-20" },
-    { id: "3", name: "Michael Chen", email: "michael@example.com", phone: "+62 821-5555-4444", location: "Kuta Lombok", bookings: 8, totalSpent: 12000000, status: "vip", createdAt: "2023-11-10" },
-    { id: "4", name: "Emily Brown", email: "emily@example.com", phone: "+62 857-1234-5678", location: "Praya", bookings: 1, totalSpent: 850000, status: "new", createdAt: "2024-03-01" },
-    { id: "5", name: "David Wilson", email: "david@example.com", phone: "+62 878-9999-8888", location: "Gili Trawangan", bookings: 12, totalSpent: 18500000, status: "vip", createdAt: "2023-08-05" },
-];
-
 const formatIDR = (value: number) =>
     new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(value);
 
@@ -69,17 +60,12 @@ export default function CustomersPage() {
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
     const [customerToDelete, setCustomerToDelete] = useState<string | null>(null);
 
-    // Fetch customers (with fallback to mock data)
-    const { data: customers = mockCustomers, isLoading } = useQuery<Customer[]>({
+    // Fetch customers from API
+    const { data: customers = [], isLoading } = useQuery<Customer[]>({
         queryKey: ["customers-list"],
         queryFn: async () => {
-            try {
-                const res = await api.get("/customers");
-                return res.data;
-            } catch {
-                // Fallback to mock data if API not available
-                return mockCustomers;
-            }
+            const res = await api.get("/customers");
+            return Array.isArray(res.data) ? res.data : (res.data?.data || []);
         },
     });
 

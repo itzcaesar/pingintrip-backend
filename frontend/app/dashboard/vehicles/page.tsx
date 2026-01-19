@@ -71,11 +71,12 @@ export default function VehiclesPage() {
     const [vehicleToDelete, setVehicleToDelete] = useState<string | null>(null);
 
     // Fetch vehicles
-    const { data: vehicles, isLoading } = useQuery<Vehicle[]>({
+    const { data: vehicles = [], isLoading } = useQuery<Vehicle[]>({
         queryKey: ["vehicles-list"],
         queryFn: async () => {
             const res = await api.get("/vehicles");
-            return res.data;
+            // Handle both array response and object with data property
+            return Array.isArray(res.data) ? res.data : (res.data?.data || []);
         },
     });
 

@@ -1,22 +1,28 @@
 // app/dashboard/calendar/page.tsx
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { CalendarDays, ChevronLeft, ChevronRight, Clock, MapPin, CarFront } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
+import api from "@/lib/api";
+import { format } from "date-fns";
 
-// Mock booking events
-const bookingEvents = [
-    { id: 1, date: 5, title: "Toyota Avanza", customer: "John Doe", time: "09:00 - 18:00", status: "confirmed" },
-    { id: 2, date: 8, title: "Honda PCX", customer: "Sarah J.", time: "All Day", status: "confirmed" },
-    { id: 3, date: 12, title: "Innova Zenix", customer: "Michael C.", time: "06:00 - 22:00", status: "pending" },
-    { id: 4, date: 15, title: "Suzuki Jimny", customer: "Emily B.", time: "All Day", status: "confirmed" },
-    { id: 5, date: 18, title: "NMAX Turbo", customer: "David W.", time: "12:00 - 20:00", status: "confirmed" },
-    { id: 6, date: 22, title: "Toyota Avanza", customer: "Alex M.", time: "All Day", status: "pending" },
-    { id: 7, date: 25, title: "Honda Brio", customer: "Lisa K.", time: "08:00 - 17:00", status: "confirmed" },
-];
+type Booking = {
+    id: string;
+    customerName: string;
+    vehicleType: string;
+    pickupDate: string;
+    dropoffDate?: string;
+    status: "PENDING" | "CONFIRMED" | "ON_TRIP" | "COMPLETED" | "CANCELLED";
+    assignedVehicle?: {
+        brand: string;
+        model: string;
+    };
+};
 
 const daysOfWeek = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
@@ -34,6 +40,40 @@ export default function CalendarPage() {
 
     const monthName = currentDate.toLocaleString('default', { month: 'long', year: 'numeric' });
 
+    // Fetch bookings from API
+    const { data: bookings = [], isLoading } = useQuery<Booking[]>({
+        queryKey: ["calendar-bookings", year, month],
+        queryFn: async () => {
+            const res = await api.get(`/bookings?limit=100`);
+            const data = Array.isArray(res.data) ? res.data : (res.data?.data || []);
+            return data;
+        },
+    });
+
+    // Transform bookings to calendar events
+    const bookingEvents = useMemo(() => {
+        return bookings.map(booking => {
+            const pickupDate = new Date(booking.pickupDate);
+            return {
+                id: booking.id,
+                date: pickupDate.getDate(),
+                month: pickupDate.getMonth(),
+                year: pickupDate.getFullYear(),
+                title: booking.assignedVehicle
+                    ? `${booking.assignedVehicle.brand} ${booking.assignedVehicle.model}`
+                    : booking.vehicleType,
+                customer: booking.customerName,
+                time: format(pickupDate, "HH:mm"),
+                status: booking.status.toLowerCase(),
+            };
+        });
+    }, [bookings]);
+
+    // Filter events for current month
+    const currentMonthEvents = bookingEvents.filter(
+        e => e.month === month && e.year === year
+    );
+
     // Generate calendar days
     const calendarDays = [];
     for (let i = 0; i < firstDay; i++) {
@@ -43,9 +83,29 @@ export default function CalendarPage() {
         calendarDays.push(day);
     }
 
-    const getEventsForDay = (day: number) => bookingEvents.filter(e => e.date === day);
+    const getEventsForDay = (day: number) => currentMonthEvents.filter(e => e.date === day);
     const today = new Date().getDate();
     const isToday = (day: number) => day === today && month === new Date().getMonth() && year === new Date().getFullYear();
+
+    // Stats
+    const confirmedCount = currentMonthEvents.filter(e => e.status === 'confirmed').length;
+    const pendingCount = currentMonthEvents.filter(e => e.status === 'pending').length;
+    const uniqueVehicles = new Set(currentMonthEvents.map(e => e.title)).size;
+
+    if (isLoading) {
+        return (
+            <div className="space-y-6">
+                <div className="flex items-center justify-between">
+                    <Skeleton className="h-10 w-48" />
+                    <Skeleton className="h-10 w-40" />
+                </div>
+                <div className="grid gap-4 md:grid-cols-4">
+                    {[1, 2, 3, 4].map(i => <Skeleton key={i} className="h-20" />)}
+                </div>
+                <Skeleton className="h-96" />
+            </div>
+        );
+    }
 
     return (
         <div className="space-y-6">
@@ -75,7 +135,7 @@ export default function CalendarPage() {
                         </div>
                         <div>
                             <p className="text-sm text-muted-foreground">This Month</p>
-                            <p className="text-2xl font-bold text-foreground">{bookingEvents.length}</p>
+                            <p className="text-2xl font-bold text-foreground">{currentMonthEvents.length}</p>
                         </div>
                     </CardContent>
                 </Card>
@@ -86,7 +146,7 @@ export default function CalendarPage() {
                         </div>
                         <div>
                             <p className="text-sm text-muted-foreground">Confirmed</p>
-                            <p className="text-2xl font-bold text-foreground">{bookingEvents.filter(e => e.status === 'confirmed').length}</p>
+                            <p className="text-2xl font-bold text-foreground">{confirmedCount}</p>
                         </div>
                     </CardContent>
                 </Card>
@@ -97,7 +157,7 @@ export default function CalendarPage() {
                         </div>
                         <div>
                             <p className="text-sm text-muted-foreground">Pending</p>
-                            <p className="text-2xl font-bold text-foreground">{bookingEvents.filter(e => e.status === 'pending').length}</p>
+                            <p className="text-2xl font-bold text-foreground">{pendingCount}</p>
                         </div>
                     </CardContent>
                 </Card>
@@ -108,7 +168,7 @@ export default function CalendarPage() {
                         </div>
                         <div>
                             <p className="text-sm text-muted-foreground">Vehicles Booked</p>
-                            <p className="text-2xl font-bold text-foreground">{new Set(bookingEvents.map(e => e.title)).size}</p>
+                            <p className="text-2xl font-bold text-foreground">{uniqueVehicles}</p>
                         </div>
                     </CardContent>
                 </Card>
@@ -173,30 +233,35 @@ export default function CalendarPage() {
                     <CardDescription>Scheduled rentals for this month.</CardDescription>
                 </CardHeader>
                 <CardContent>
-                    <div className="space-y-3">
-                        {bookingEvents.map(event => (
-                            <div key={event.id} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg border border-border">
-                                <div className="flex items-center gap-4">
-                                    <div className="flex items-center justify-center w-10 h-10 bg-card rounded-lg border border-border text-sm font-bold text-foreground">
-                                        {event.date}
-                                    </div>
-                                    <div>
-                                        <p className="font-medium text-foreground">{event.title}</p>
-                                        <div className="flex items-center gap-3 text-xs text-muted-foreground">
-                                            <span>{event.customer}</span>
-                                            <span className="flex items-center gap-1"><Clock className="h-3 w-3" />{event.time}</span>
+                    {currentMonthEvents.length > 0 ? (
+                        <div className="space-y-3">
+                            {currentMonthEvents.map(event => (
+                                <div key={event.id} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg border border-border">
+                                    <div className="flex items-center gap-4">
+                                        <div className="flex items-center justify-center w-10 h-10 bg-card rounded-lg border border-border text-sm font-bold text-foreground">
+                                            {event.date}
+                                        </div>
+                                        <div>
+                                            <p className="font-medium text-foreground">{event.title}</p>
+                                            <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                                                <span>{event.customer}</span>
+                                                <span className="flex items-center gap-1"><Clock className="h-3 w-3" />{event.time}</span>
+                                            </div>
                                         </div>
                                     </div>
+                                    <Badge variant={event.status === 'confirmed' ? 'default' : 'secondary'} className={`text-xs ${event.status === 'confirmed' ? 'bg-emerald-100 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300' : 'bg-amber-100 dark:bg-amber-900/50 text-amber-700 dark:text-amber-300'}`}>
+                                        {event.status}
+                                    </Badge>
                                 </div>
-                                <Badge variant={event.status === 'confirmed' ? 'default' : 'secondary'} className={`text-xs ${event.status === 'confirmed' ? 'bg-emerald-100 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300' : 'bg-amber-100 dark:bg-amber-900/50 text-amber-700 dark:text-amber-300'}`}>
-                                    {event.status}
-                                </Badge>
-                            </div>
-                        ))}
-                    </div>
+                            ))}
+                        </div>
+                    ) : (
+                        <div className="text-center py-8 text-muted-foreground">
+                            No bookings scheduled for this month.
+                        </div>
+                    )}
                 </CardContent>
             </Card>
         </div>
     );
 }
-
