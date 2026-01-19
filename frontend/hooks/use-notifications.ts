@@ -38,7 +38,7 @@ export const useNotifications = create<NotificationStore>((set, get) => ({
         });
 
         socket.on('connect', () => {
-            console.log('Connected to notifications namespace');
+            // Connected to notifications namespace
         });
 
         socket.on('notification', (newNotification: Notification) => {
@@ -50,7 +50,6 @@ export const useNotifications = create<NotificationStore>((set, get) => ({
             // Show toast
             toast(newNotification.title, {
                 description: newNotification.message,
-                // action: { label: 'View', onClick: () => console.log('View notification') },
             });
         });
 

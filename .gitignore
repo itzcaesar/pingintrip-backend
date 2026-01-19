@@ -13,5 +13,8 @@ node_modules
 # IDE
 .vscode
 
-# Test coverage
+# Test Files
 coverage
+
+# Build
+dist

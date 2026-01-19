@@ -29,7 +29,6 @@ export class UsersController {
 
     @Patch('me')
     updateMe(@Request() req: any, @Body() updateUserDto: UpdateUserDto) {
-        console.log('UpdateMe req.user:', req.user);
         // Prevent non-admins from changing their own role
         if (req.user.role !== Role.ADMIN) {
             delete updateUserDto.role;
