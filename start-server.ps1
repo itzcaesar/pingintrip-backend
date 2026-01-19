@@ -37,10 +37,10 @@ if ($Seed) {
     npx prisma db seed
 }
 
-# Frontend dependencies
-if (-not $BackendOnly -and -not (Test-Path "frontend\node_modules")) {
-    Write-Host "Installing Frontend dependencies..." -ForegroundColor Yellow
-    Set-Location "$ProjectRoot\frontend"
+# Dashboard dependencies
+if (-not $BackendOnly -and -not (Test-Path "dashboard\node_modules")) {
+    Write-Host "Installing Dashboard dependencies..." -ForegroundColor Yellow
+    Set-Location "$ProjectRoot\dashboard"
     npm install
     Set-Location $ProjectRoot
 }
@@ -49,15 +49,16 @@ Write-Host "Starting Services..." -ForegroundColor Green
 
 if ($Prod) {
     Write-Host "Production mode not supported in this script." -ForegroundColor Red
-} else {
+}
+else {
     # Backend
     Write-Host "Starting Backend (Port 3000)..." -ForegroundColor Cyan
     Start-Process powershell -ArgumentList "npm run start:dev"
 
     if (-not $BackendOnly) {
-        # Frontend
-        Write-Host "Starting Frontend (Port 3001)..." -ForegroundColor Magenta
-        Set-Location "$ProjectRoot\frontend"
+        # Dashboard
+        Write-Host "Starting Dashboard (Port 3001)..." -ForegroundColor Magenta
+        Set-Location "$ProjectRoot\dashboard"
         Start-Process powershell -ArgumentList "npm run dev"
         Set-Location $ProjectRoot
     }
