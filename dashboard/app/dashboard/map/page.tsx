@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import { useQuery } from "@tanstack/react-query";
 import dynamic from "next/dynamic";
 import { Badge } from "@/components/ui/badge";
@@ -52,8 +52,24 @@ interface VehicleData {
     customerName: string;
 }
 
+// Lombok road waypoints for realistic movement
+const LOMBOK_WAYPOINTS = [
+    { lat: -8.5833, lng: 116.1167 }, // Mataram City
+    { lat: -8.5200, lng: 116.0750 }, // Batulayar
+    { lat: -8.4927, lng: 116.0480 }, // Senggigi
+    { lat: -8.4650, lng: 116.0350 }, // Mangsit
+    { lat: -8.7573, lng: 116.2765 }, // Airport
+    { lat: -8.7100, lng: 116.2650 }, // Praya Bypass
+    { lat: -8.8950, lng: 116.2920 }, // Kuta Lombok
+    { lat: -8.6500, lng: 116.2100 }, // Praya Town
+    { lat: -8.4100, lng: 116.4200 }, // Sembalun
+    { lat: -8.4050, lng: 116.1200 }, // Bangsal
+];
+
 export default function MapPage() {
     const [vehicles, setVehicles] = useState<VehicleData[]>([]);
+    const animationRef = useRef<NodeJS.Timeout | null>(null);
+    const destinationsRef = useRef<Map<string, { lat: number; lng: number }>>(new Map());
 
     // Fetch GPS vehicle data from API
     const { data: gpsVehicles = [], isLoading } = useQuery<GpsVehicle[]>({
@@ -62,14 +78,29 @@ export default function MapPage() {
             const res = await api.get("/gps/vehicles");
             return Array.isArray(res.data) ? res.data : (res.data?.data || []);
         },
-        refetchInterval: 5000, // Refresh every 5 seconds for live updates
+        refetchInterval: 30000, // Refresh from server every 30 seconds
     });
 
-    // Transform GPS data to map format
+    // Get a random waypoint different from current position
+    const getRandomDestination = useCallback((currentLat: number, currentLng: number) => {
+        const filtered = LOMBOK_WAYPOINTS.filter(
+            wp => Math.abs(wp.lat - currentLat) > 0.01 || Math.abs(wp.lng - currentLng) > 0.01
+        );
+        return filtered[Math.floor(Math.random() * filtered.length)] || LOMBOK_WAYPOINTS[0];
+    }, []);
+
+    // Calculate heading between two points
+    const calculateHeading = (fromLat: number, fromLng: number, toLat: number, toLng: number) => {
+        const dLng = toLng - fromLng;
+        const dLat = toLat - fromLat;
+        const angle = Math.atan2(dLng, dLat) * (180 / Math.PI);
+        return (angle + 360) % 360;
+    };
+
+    // Transform GPS data to map format (initial load)
     useEffect(() => {
-        if (gpsVehicles.length > 0) {
+        if (gpsVehicles.length > 0 && vehicles.length === 0) {
             const transformed: VehicleData[] = gpsVehicles
-                // Filter out any GPS data with invalid coordinates
                 .filter((gps) =>
                     gps.latitude != null &&
                     gps.longitude != null &&
@@ -77,9 +108,10 @@ export default function MapPage() {
                     !isNaN(gps.longitude)
                 )
                 .map((gps) => {
-                    // Properly detect vehicle type - MOTOR is for motorcycles, everything else is CAR
                     const vType = gps.vehicle?.type;
                     const displayType: VehicleType = vType === "MOTOR" ? "MOTOR" : "CAR";
+                    const dest = getRandomDestination(gps.latitude, gps.longitude);
+                    destinationsRef.current.set(gps.id, dest);
 
                     return {
                         id: gps.id,
@@ -88,17 +120,78 @@ export default function MapPage() {
                         type: displayType,
                         name: gps.vehicle ? `${gps.vehicle.brand} ${gps.vehicle.model}` : "Unknown Vehicle",
                         plate: gps.vehicle?.plateNumber || "N/A",
-                        rotation: gps.heading || 0,
-                        status: (gps.speed && gps.speed > 0) ? "MOVING" : "IDLE",
-                        speed: gps.speed || 0,
-                        destination: [gps.latitude, gps.longitude] as [number, number],
-                        driverName: "N/A",
-                        customerName: "N/A",
+                        rotation: calculateHeading(gps.latitude, gps.longitude, dest.lat, dest.lng),
+                        status: "MOVING",
+                        speed: 20 + Math.random() * 40, // 20-60 km/h
+                        destination: [dest.lat, dest.lng] as [number, number],
+                        driverName: "On Duty",
+                        customerName: "Active Trip",
                     };
                 });
             setVehicles(transformed);
         }
-    }, [gpsVehicles]);
+    }, [gpsVehicles, vehicles.length, getRandomDestination]);
+
+    // Animate vehicle movement
+    useEffect(() => {
+        if (vehicles.length === 0) return;
+
+        const moveVehicles = () => {
+            setVehicles(prevVehicles =>
+                prevVehicles.map(vehicle => {
+                    // Get or set destination
+                    let dest = destinationsRef.current.get(vehicle.id);
+                    if (!dest) {
+                        dest = getRandomDestination(vehicle.lat, vehicle.lng);
+                        destinationsRef.current.set(vehicle.id, dest);
+                    }
+
+                    // Calculate distance to destination
+                    const distLat = dest.lat - vehicle.lat;
+                    const distLng = dest.lng - vehicle.lng;
+                    const distance = Math.sqrt(distLat * distLat + distLng * distLng);
+
+                    // If close to destination, pick a new one
+                    if (distance < 0.005) {
+                        dest = getRandomDestination(vehicle.lat, vehicle.lng);
+                        destinationsRef.current.set(vehicle.id, dest);
+                    }
+
+                    // Move toward destination (speed varies by vehicle type)
+                    const baseSpeed = vehicle.type === "MOTOR" ? 0.0008 : 0.0012;
+                    const speed = baseSpeed + Math.random() * 0.0004;
+
+                    // Normalize direction
+                    const newLat = vehicle.lat + (distLat / distance) * speed;
+                    const newLng = vehicle.lng + (distLng / distance) * speed;
+
+                    // Calculate new heading
+                    const newRotation = calculateHeading(vehicle.lat, vehicle.lng, newLat, newLng);
+
+                    // Random chance to go idle (5%)
+                    const isMoving = Math.random() > 0.05;
+
+                    return {
+                        ...vehicle,
+                        lat: isMoving ? newLat : vehicle.lat,
+                        lng: isMoving ? newLng : vehicle.lng,
+                        rotation: newRotation,
+                        status: isMoving ? "MOVING" : "IDLE",
+                        speed: isMoving ? 20 + Math.random() * 40 : 0,
+                    };
+                })
+            );
+        };
+
+        // Update positions every 2 seconds
+        animationRef.current = setInterval(moveVehicles, 2000);
+
+        return () => {
+            if (animationRef.current) {
+                clearInterval(animationRef.current);
+            }
+        };
+    }, [vehicles.length, getRandomDestination]);
 
     if (isLoading) {
         return (

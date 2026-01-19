@@ -73,40 +73,51 @@ const LOMBOK_ROUTES: TripRoute[] = [
     { pickup: 'Mataram City', dropoff: 'Self-drive Exploration (Scooter)', duration: 3, category: 'ISLAND_TOUR', vehicleTypes: ['MOTOR'] },
 ];
 
-// Specific GPS coordinates for real locations in Lombok (ON LAND)
+// GPS coordinates verified to be ON ROADS in Lombok (not ocean)
 const LOMBOK_LOCATIONS = [
-    // Mataram City (Capital)
+    // Mataram City (Capital) - Main roads
     { lat: -8.5833, lng: 116.1167, name: 'Mataram City Center' },
-    { lat: -8.5775, lng: 116.1231, name: 'Mataram Mall' },
-    { lat: -8.5912, lng: 116.0986, name: 'Ampenan' },
-    // Senggigi Beach Road
-    { lat: -8.4927, lng: 116.0465, name: 'Senggigi Beach' },
-    { lat: -8.5102, lng: 116.0587, name: 'Senggigi Central' },
-    { lat: -8.4756, lng: 116.0321, name: 'Mangsit' },
-    // Lombok Airport Area
+    { lat: -8.5790, lng: 116.1180, name: 'Jl Pejanggik Mataram' },
+    { lat: -8.5850, lng: 116.1050, name: 'Ampenan Old Town' },
+    { lat: -8.5720, lng: 116.0950, name: 'Jl Raya Senggigi Start' },
+
+    // Senggigi Road (coastal road but ON LAND)
+    { lat: -8.5200, lng: 116.0750, name: 'Batulayar' },
+    { lat: -8.4927, lng: 116.0480, name: 'Senggigi Beach Road' },
+    { lat: -8.4800, lng: 116.0400, name: 'Senggigi Central' },
+    { lat: -8.4650, lng: 116.0350, name: 'Mangsit Area' },
+
+    // Airport & South Road
     { lat: -8.7573, lng: 116.2765, name: 'Lombok Praya Airport' },
-    { lat: -8.7489, lng: 116.2654, name: 'Airport Road' },
-    // Kuta Lombok (South)
-    { lat: -8.8989, lng: 116.2889, name: 'Kuta Lombok' },
-    { lat: -8.8876, lng: 116.3012, name: 'Tanjung Aan' },
-    { lat: -8.8765, lng: 116.2567, name: 'Selong Belanak' },
-    // Central Lombok
-    { lat: -8.6512, lng: 116.1234, name: 'Praya Town' },
-    { lat: -8.6234, lng: 116.1567, name: 'Jonggat' },
-    // Mount Rinjani Area
-    { lat: -8.4112, lng: 116.4223, name: 'Sembalun Village' },
-    { lat: -8.3989, lng: 116.3876, name: 'Senaru' },
-    // West Lombok
-    { lat: -8.5234, lng: 116.0123, name: 'Lembar Port' },
-    { lat: -8.5567, lng: 116.0456, name: 'Gerung' },
+    { lat: -8.7350, lng: 116.2800, name: 'Airport Exit Road' },
+    { lat: -8.7100, lng: 116.2650, name: 'Praya Bypass' },
+
+    // Kuta Lombok (South) - Inland roads
+    { lat: -8.8950, lng: 116.2920, name: 'Kuta Lombok Center' },
+    { lat: -8.8900, lng: 116.3050, name: 'Jl Raya Kuta' },
+    { lat: -8.8800, lng: 116.2600, name: 'Selong Belanak Road' },
+
+    // Central Lombok - Main highways
+    { lat: -8.6500, lng: 116.2100, name: 'Praya Town Center' },
+    { lat: -8.6200, lng: 116.2300, name: 'Jl Trans Lombok' },
+    { lat: -8.6000, lng: 116.1800, name: 'Jonggat Road' },
+
+    // Rinjani Area - Mountain roads
+    { lat: -8.4100, lng: 116.4200, name: 'Sembalun Village' },
+    { lat: -8.3150, lng: 116.4050, name: 'Senaru Village' },
+    { lat: -8.3500, lng: 116.3800, name: 'Rinjani Basecamp Road' },
+
+    // Bangsal (Gili boat harbour) - avoid ocean
+    { lat: -8.4050, lng: 116.1200, name: 'Bangsal Harbour Road' },
+    { lat: -8.4150, lng: 116.1300, name: 'Pemenang' },
 ];
 
 function randomLombokGPS() {
-    // Pick a random known location and add small variance (100-500m)
+    // Pick a random known location and add SMALL variance (50-100m only)
     const base = LOMBOK_LOCATIONS[Math.floor(Math.random() * LOMBOK_LOCATIONS.length)];
     return {
-        lat: base.lat + (Math.random() - 0.5) * 0.005, // ~500m variance
-        lng: base.lng + (Math.random() - 0.5) * 0.005,
+        lat: base.lat + (Math.random() - 0.5) * 0.001, // ~100m variance (reduced from 500m)
+        lng: base.lng + (Math.random() - 0.5) * 0.001,
     };
 }
 
