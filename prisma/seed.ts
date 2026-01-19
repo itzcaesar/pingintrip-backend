@@ -20,40 +20,57 @@ const INDONESIAN_LAST_NAMES = [
     'Permana', 'Purnama', 'Setiawan', 'Budiman', 'Hartono', 'Gunawan'
 ];
 
-const LOMBOK_PICKUP_LOCATIONS = [
-    'Bandara Lombok Praya',
-    'Pelabuhan Lembar',
-    'Hotel Sheraton Senggigi',
-    'Gili Trawangan Harbour',
-    'Mataram City Center',
-    'Kuta Lombok Beach',
-    'Selong Belanak',
-    'Pink Beach Lombok',
-    'Hotel Novotel Lombok',
-    'Tanjung Aan Beach',
-    'Sembalun Village',
-    'Mount Rinjani Basecamp',
-    'Pusuk Monkey Forest',
-    'Mandalika Resort Area',
-    'Sasak Village Sade'
-];
+// ============================================================================
+// REALISTIC LOMBOK TRAVEL ROUTES
+// These represent actual travel patterns in Lombok tourism
+// ============================================================================
 
-const LOMBOK_DESTINATIONS = [
-    'Gili Trawangan',
-    'Gili Meno',
-    'Gili Air',
-    'Senggigi Beach',
-    'Mount Rinjani',
-    'Kuta Mandalika',
-    'Pink Beach (Pantai Merah)',
-    'Selong Belanak Beach',
-    'Tanjung Aan',
-    'Sembalun Village',
-    'Sasak Village Sade',
-    'Bangsal Harbour',
-    'Mataram City Tour',
-    'Narmada Temple',
-    'Pusuk Monkey Forest'
+type TripRoute = {
+    pickup: string;
+    dropoff: string;
+    duration: number;  // typical duration in days
+    category: 'AIRPORT_TRANSFER' | 'GILI_TRIP' | 'SOUTH_BEACHES' | 'RINJANI' | 'ISLAND_TOUR' | 'CITY_TOUR';
+    vehicleTypes: VehicleType[];  // suitable vehicle types
+};
+
+const LOMBOK_ROUTES: TripRoute[] = [
+    // Airport Transfers (most common)
+    { pickup: 'Bandara Lombok Praya', dropoff: 'Hotel Senggigi Area', duration: 1, category: 'AIRPORT_TRANSFER', vehicleTypes: ['CAR', 'VAN'] },
+    { pickup: 'Bandara Lombok Praya', dropoff: 'Kuta Mandalika', duration: 1, category: 'AIRPORT_TRANSFER', vehicleTypes: ['CAR', 'VAN'] },
+    { pickup: 'Bandara Lombok Praya', dropoff: 'Mataram City', duration: 1, category: 'AIRPORT_TRANSFER', vehicleTypes: ['CAR', 'VAN'] },
+    { pickup: 'Hotel Senggigi Area', dropoff: 'Bandara Lombok Praya', duration: 1, category: 'AIRPORT_TRANSFER', vehicleTypes: ['CAR', 'VAN'] },
+    { pickup: 'Kuta Mandalika', dropoff: 'Bandara Lombok Praya', duration: 1, category: 'AIRPORT_TRANSFER', vehicleTypes: ['CAR', 'VAN'] },
+
+    // Gili Island Day Trips (via Bangsal Harbour)
+    { pickup: 'Hotel Senggigi Area', dropoff: 'Bangsal Harbour (Gili Boats)', duration: 1, category: 'GILI_TRIP', vehicleTypes: ['CAR', 'MOTOR'] },
+    { pickup: 'Mataram City', dropoff: 'Bangsal Harbour (Gili Boats)', duration: 1, category: 'GILI_TRIP', vehicleTypes: ['CAR', 'MOTOR'] },
+    { pickup: 'Bangsal Harbour', dropoff: 'Hotel Senggigi Area', duration: 1, category: 'GILI_TRIP', vehicleTypes: ['CAR', 'MOTOR'] },
+
+    // South Beaches Tour (Kuta, Tanjung Aan, Selong Belanak)
+    { pickup: 'Hotel Senggigi Area', dropoff: 'South Beaches (Kuta, Tanjung Aan, Selong Belanak)', duration: 1, category: 'SOUTH_BEACHES', vehicleTypes: ['CAR', 'MOTOR'] },
+    { pickup: 'Mataram City', dropoff: 'South Beaches Tour', duration: 1, category: 'SOUTH_BEACHES', vehicleTypes: ['CAR', 'MOTOR'] },
+    { pickup: 'Kuta Mandalika', dropoff: 'Tanjung Aan & Selong Belanak', duration: 1, category: 'SOUTH_BEACHES', vehicleTypes: ['MOTOR'] },
+    { pickup: 'Bandara Lombok Praya', dropoff: 'Kuta Beaches Full Day', duration: 2, category: 'SOUTH_BEACHES', vehicleTypes: ['CAR', 'VAN'] },
+
+    // Mount Rinjani Trekking (requires multi-day)
+    { pickup: 'Mataram City', dropoff: 'Sembalun Village (Rinjani Basecamp)', duration: 3, category: 'RINJANI', vehicleTypes: ['CAR', 'VAN'] },
+    { pickup: 'Hotel Senggigi Area', dropoff: 'Senaru (Rinjani Basecamp)', duration: 3, category: 'RINJANI', vehicleTypes: ['CAR', 'VAN'] },
+    { pickup: 'Bandara Lombok Praya', dropoff: 'Sembalun Village (Rinjani Trek)', duration: 4, category: 'RINJANI', vehicleTypes: ['CAR', 'VAN'] },
+
+    // Full Island Tour
+    { pickup: 'Bandara Lombok Praya', dropoff: 'Lombok Island Full Tour', duration: 3, category: 'ISLAND_TOUR', vehicleTypes: ['CAR', 'VAN'] },
+    { pickup: 'Hotel Senggigi Area', dropoff: 'Lombok Circle Tour', duration: 2, category: 'ISLAND_TOUR', vehicleTypes: ['CAR', 'VAN'] },
+    { pickup: 'Kuta Mandalika', dropoff: 'North Lombok & Senggigi Tour', duration: 2, category: 'ISLAND_TOUR', vehicleTypes: ['CAR'] },
+
+    // City & Culture Tours
+    { pickup: 'Hotel Senggigi Area', dropoff: 'Sasak Village Sade & Pottery Village', duration: 1, category: 'CITY_TOUR', vehicleTypes: ['CAR', 'MOTOR'] },
+    { pickup: 'Mataram City', dropoff: 'Narmada Temple & Mayura Water Palace', duration: 1, category: 'CITY_TOUR', vehicleTypes: ['CAR', 'MOTOR'] },
+    { pickup: 'Kuta Mandalika', dropoff: 'Traditional Weaving Villages', duration: 1, category: 'CITY_TOUR', vehicleTypes: ['CAR', 'MOTOR'] },
+
+    // Scooter rentals (self-drive exploration)
+    { pickup: 'Kuta Mandalika', dropoff: 'Self-drive Exploration (Scooter)', duration: 1, category: 'SOUTH_BEACHES', vehicleTypes: ['MOTOR'] },
+    { pickup: 'Hotel Senggigi Area', dropoff: 'Self-drive Exploration (Scooter)', duration: 2, category: 'CITY_TOUR', vehicleTypes: ['MOTOR'] },
+    { pickup: 'Mataram City', dropoff: 'Self-drive Exploration (Scooter)', duration: 3, category: 'ISLAND_TOUR', vehicleTypes: ['MOTOR'] },
 ];
 
 // Specific GPS coordinates for real locations in Lombok (ON LAND)
@@ -345,6 +362,27 @@ async function main() {
         });
     }
 
+    // Track vehicle bookings by date to prevent double-booking
+    type VehicleBooking = { vehicleId: string; startDate: Date; endDate: Date };
+    const vehicleSchedule: VehicleBooking[] = [];
+
+    function isVehicleAvailable(vehicleId: string, startDate: Date, duration: number): boolean {
+        const endDate = new Date(startDate);
+        endDate.setDate(endDate.getDate() + duration);
+
+        return !vehicleSchedule.some(booking => {
+            if (booking.vehicleId !== vehicleId) return false;
+            // Check for date overlap
+            return startDate < booking.endDate && endDate > booking.startDate;
+        });
+    }
+
+    function bookVehicle(vehicleId: string, startDate: Date, duration: number) {
+        const endDate = new Date(startDate);
+        endDate.setDate(endDate.getDate() + duration);
+        vehicleSchedule.push({ vehicleId, startDate, endDate });
+    }
+
     // Status distribution:
     // - 8 PENDING (upcoming)
     // - 12 CONFIRMED (upcoming)
@@ -352,66 +390,90 @@ async function main() {
     // - 25 COMPLETED (past)
     // - 4 CANCELLED
     const bookingConfigs = [
-        // PENDING - future dates, no vehicle assigned
-        ...Array(8).fill({ status: 'PENDING', dayOffset: () => 5 + Math.floor(Math.random() * 20), hasVehicle: false }),
-        // CONFIRMED - upcoming, vehicle assigned
-        ...Array(12).fill({ status: 'CONFIRMED', dayOffset: () => 1 + Math.floor(Math.random() * 10), hasVehicle: true }),
-        // ON_TRIP - current (started within last few days)
-        ...Array(6).fill({ status: 'ON_TRIP', dayOffset: () => -Math.floor(Math.random() * 3), hasVehicle: true }),
+        // PENDING - future dates
+        ...Array(8).fill({ status: 'PENDING', dayOffset: () => 5 + Math.floor(Math.random() * 20) }),
+        // CONFIRMED - upcoming
+        ...Array(12).fill({ status: 'CONFIRMED', dayOffset: () => 1 + Math.floor(Math.random() * 10) }),
+        // ON_TRIP - current
+        ...Array(6).fill({ status: 'ON_TRIP', dayOffset: () => -Math.floor(Math.random() * 2) }),
         // COMPLETED - past
-        ...Array(25).fill({ status: 'COMPLETED', dayOffset: () => -3 - Math.floor(Math.random() * 60), hasVehicle: true }),
+        ...Array(25).fill({ status: 'COMPLETED', dayOffset: () => -3 - Math.floor(Math.random() * 60) }),
         // CANCELLED
-        ...Array(4).fill({ status: 'CANCELLED', dayOffset: () => -5 - Math.floor(Math.random() * 30), hasVehicle: false }),
+        ...Array(4).fill({ status: 'CANCELLED', dayOffset: () => -5 - Math.floor(Math.random() * 30) }),
     ];
 
     const bookings: Booking[] = [];
     const sources: BookingSource[] = ['WEB', 'GFORM', 'MANUAL'];
-    const usedVehicleIds = new Set<string>();
 
     for (const config of bookingConfigs) {
         const customer = randomElement(customerProfiles);
-        const rand = Math.random();
-        const vehicleType: VehicleType = rand > 0.65 ? 'CAR' : rand > 0.15 ? 'MOTOR' : 'VAN';
-        const duration = vehicleType === 'MOTOR' ? (1 + Math.floor(Math.random() * 3)) : (1 + Math.floor(Math.random() * 5));
         const pickupDate = getDateDaysFromNow(config.dayOffset());
 
-        let assignedVehicle = null;
-        let assignedDriver = null;
-        let totalPrice = 0;
+        // Pick a random route
+        const route = randomElement(LOMBOK_ROUTES);
+        const duration = route.duration + (Math.random() > 0.7 ? 1 : 0); // Sometimes extend
 
-        // Always try to assign a vehicle to avoid "CAR" label in charts
-        // For PENDING/CANCELLED, it simulates a tentative assignment history
-        const matchingVehicles = vehicles.filter(v =>
-            v.type === vehicleType && !usedVehicleIds.has(v.id)
-        );
+        // Get matching vehicle type from route
+        const vehicleType = randomElement(route.vehicleTypes);
 
-        if (matchingVehicles.length > 0 && config.status === 'ON_TRIP') {
-            assignedVehicle = randomElement(matchingVehicles);
-            usedVehicleIds.add(assignedVehicle.id);
-        } else if (matchingVehicles.length > 0) {
-            assignedVehicle = randomElement(matchingVehicles);
-        } else {
-            // Fallback to any of that type
-            const typeVehicles = vehicles.filter(v => v.type === vehicleType);
-            if (typeVehicles.length > 0) {
-                assignedVehicle = randomElement(typeVehicles);
+        // Find an available vehicle of that type
+        let assignedVehicle: Vehicle | null = null;
+        let assignedDriver: Driver | null = null;
+
+        const matchingVehicles = vehicles.filter(v => v.type === vehicleType);
+
+        // Try to find a vehicle that's not booked for these dates
+        for (const v of matchingVehicles) {
+            if (isVehicleAvailable(v.id, pickupDate, duration)) {
+                assignedVehicle = v;
+                bookVehicle(v.id, pickupDate, duration);
+                break;
             }
         }
 
+        // Fallback: just use any matching vehicle (allows some overlap for completed bookings)
+        if (!assignedVehicle && matchingVehicles.length > 0) {
+            assignedVehicle = randomElement(matchingVehicles);
+        }
+
+        let totalPrice = 0;
         if (assignedVehicle) {
             totalPrice = assignedVehicle.dailyRate * duration;
 
-            // Assign driver for cars (70% chance)
-            if (vehicleType === 'CAR' && Math.random() > 0.3) {
+            // Assign driver for CAR/VAN (with driver) - 80% chance
+            if ((vehicleType === 'CAR' || vehicleType === 'VAN') && Math.random() > 0.2) {
                 const activeDrivers = drivers.filter(d => d.status === 'ACTIVE');
                 if (activeDrivers.length > 0) {
                     assignedDriver = randomElement(activeDrivers);
+                    // Add driver fee (approximately 150k-200k/day)
+                    totalPrice += (150000 + Math.floor(Math.random() * 50000)) * duration;
                 }
             }
         } else {
-            // Should rarely happen if we have enough vehicles
-            const baseRate = vehicleType === 'CAR' ? 400000 : 100000;
-            totalPrice = baseRate * duration;
+            // Fallback price based on route category
+            const basePrices = {
+                'AIRPORT_TRANSFER': 250000,
+                'GILI_TRIP': 300000,
+                'SOUTH_BEACHES': 350000,
+                'RINJANI': 500000,
+                'ISLAND_TOUR': 450000,
+                'CITY_TOUR': 300000
+            };
+            totalPrice = (basePrices[route.category] || 300000) * duration;
+        }
+
+        // Generate contextual notes based on route
+        let notes: string | null = null;
+        if (Math.random() > 0.6) {
+            const noteOptions: Record<string, string[]> = {
+                'AIRPORT_TRANSFER': ['Flight arrives at 14:30', 'Need baby seat', 'Will have 3 large suitcases'],
+                'GILI_TRIP': ['Please arrive early for 9am boat', 'Will return on evening boat'],
+                'SOUTH_BEACHES': ['Want to visit Pink Beach too', 'Sunrise at Tanjung Aan'],
+                'RINJANI': ['Trekking with local guide', 'Need 4WD for Sembalun road'],
+                'ISLAND_TOUR': ['Include traditional village visit', 'Flexible itinerary'],
+                'CITY_TOUR': ['Interest in pottery workshops', 'Include Sasak culture tour'],
+            };
+            notes = randomElement(noteOptions[route.category] || ['Customer requests early pickup']);
         }
 
         const booking = await prisma.booking.create({
@@ -422,9 +484,9 @@ async function main() {
                 vehicleType: vehicleType,
                 pickupDate,
                 duration,
-                pickupLocation: randomElement(LOMBOK_PICKUP_LOCATIONS),
-                dropoffLocation: randomElement(LOMBOK_DESTINATIONS),
-                notes: Math.random() > 0.7 ? 'Customer requests early pickup' : null,
+                pickupLocation: route.pickup,
+                dropoffLocation: route.dropoff,
+                notes,
                 status: config.status as BookingStatus,
                 totalPrice,
                 assignedVehicleId: assignedVehicle?.id,
