@@ -21,6 +21,8 @@ const gps_1 = require("./gps");
 const gateways_1 = require("./gateways");
 const gform_1 = require("./integrations/gform");
 const settings_module_1 = require("./settings/settings.module");
+const search_module_1 = require("./search/search.module");
+const notifications_module_1 = require("./notifications/notifications.module");
 const filters_1 = require("./common/filters");
 let AppModule = class AppModule {
 };
@@ -57,6 +59,8 @@ exports.AppModule = AppModule = __decorate([
             drivers_1.DriversModule,
             gps_1.GpsModule,
             settings_module_1.SettingsModule,
+            search_module_1.SearchModule,
+            notifications_module_1.NotificationsModule,
             gform_1.GformModule,
             gateways_1.GatewaysModule,
         ],

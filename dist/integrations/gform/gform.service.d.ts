@@ -15,8 +15,8 @@ export declare class GformService {
     getImportHistory(formId?: string, limit?: number): Promise<{
         id: string;
         bookingId: string | null;
-        formId: string;
         responseHash: string;
+        formId: string;
         importedAt: Date;
     }[]>;
     private generateResponseHash;

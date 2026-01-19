@@ -14,6 +14,7 @@ const common_1 = require("@nestjs/common");
 const client_1 = require("@prisma/client");
 const prisma_service_1 = require("../prisma/prisma.service");
 const dashboard_gateway_1 = require("../gateways/dashboard.gateway");
+const notifications_service_1 = require("../notifications/notifications.service");
 const STATUS_TRANSITIONS = {
     PENDING: [client_1.BookingStatus.CONFIRMED, client_1.BookingStatus.CANCELLED],
     CONFIRMED: [client_1.BookingStatus.ON_TRIP, client_1.BookingStatus.CANCELLED],
@@ -24,9 +25,11 @@ const STATUS_TRANSITIONS = {
 let BookingsService = class BookingsService {
     prisma;
     dashboardGateway;
-    constructor(prisma, dashboardGateway) {
+    notificationsService;
+    constructor(prisma, dashboardGateway, notificationsService) {
         this.prisma = prisma;
         this.dashboardGateway = dashboardGateway;
+        this.notificationsService = notificationsService;
     }
     async create(createBookingDto, userId) {
         if (createBookingDto.assignedVehicleId) {
@@ -53,6 +56,7 @@ let BookingsService = class BookingsService {
             },
         });
         this.dashboardGateway.emitBookingCreated(booking);
+        await this.notificationsService.create('New Booking', `Booking #${booking.id.slice(0, 8)} created for ${booking.customerName}`, 'SUCCESS');
         return booking;
     }
     async findAll(queryDto) {
@@ -306,6 +310,7 @@ exports.BookingsService = BookingsService;
 exports.BookingsService = BookingsService = __decorate([
     (0, common_1.Injectable)(),
     __metadata("design:paramtypes", [prisma_service_1.PrismaService,
-        dashboard_gateway_1.DashboardGateway])
+        dashboard_gateway_1.DashboardGateway,
+        notifications_service_1.NotificationsService])
 ], BookingsService);
 //# sourceMappingURL=bookings.service.js.map

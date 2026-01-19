@@ -10,8 +10,8 @@ export declare class GformController {
     getImportHistory(formId?: string, limit?: string): Promise<{
         id: string;
         bookingId: string | null;
-        formId: string;
         responseHash: string;
+        formId: string;
         importedAt: Date;
     }[]>;
 }

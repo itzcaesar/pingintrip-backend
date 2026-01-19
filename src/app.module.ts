@@ -13,6 +13,8 @@ import { GpsModule } from './gps';
 import { GatewaysModule } from './gateways';
 import { GformModule } from './integrations/gform';
 import { SettingsModule } from './settings/settings.module';
+import { SearchModule } from './search/search.module';
+import { NotificationsModule } from './notifications/notifications.module';
 import { HttpExceptionFilter } from './common/filters';
 
 @Module({
@@ -52,7 +54,9 @@ import { HttpExceptionFilter } from './common/filters';
     VehiclesModule,
     DriversModule,
     GpsModule,
-    SettingsModule, // Added this module
+    SettingsModule,
+    SearchModule,
+    NotificationsModule,
 
     // Integrations
     GformModule,

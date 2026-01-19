@@ -11,12 +11,16 @@ const common_1 = require("@nestjs/common");
 const bookings_controller_1 = require("./bookings.controller");
 const bookings_service_1 = require("./bookings.service");
 const gateways_module_1 = require("../gateways/gateways.module");
+const notifications_module_1 = require("../notifications/notifications.module");
 let BookingsModule = class BookingsModule {
 };
 exports.BookingsModule = BookingsModule;
 exports.BookingsModule = BookingsModule = __decorate([
     (0, common_1.Module)({
-        imports: [(0, common_1.forwardRef)(() => gateways_module_1.GatewaysModule)],
+        imports: [
+            (0, common_1.forwardRef)(() => gateways_module_1.GatewaysModule),
+            notifications_module_1.NotificationsModule,
+        ],
         controllers: [bookings_controller_1.BookingsController],
         providers: [bookings_service_1.BookingsService],
         exports: [bookings_service_1.BookingsService],

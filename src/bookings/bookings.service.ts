@@ -7,6 +7,7 @@ import {
 import { BookingStatus, Prisma, PrismaClient } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { DashboardGateway } from '../gateways/dashboard.gateway';
+import { NotificationsService } from '../notifications/notifications.service';
 import {
     CreateBookingDto,
     UpdateBookingDto,
@@ -29,6 +30,7 @@ export class BookingsService {
     constructor(
         private prisma: PrismaService,
         private dashboardGateway: DashboardGateway,
+        private notificationsService: NotificationsService,
     ) { }
 
     async create(createBookingDto: CreateBookingDto, userId?: string) {
@@ -66,6 +68,13 @@ export class BookingsService {
 
         // Emit socket event
         this.dashboardGateway.emitBookingCreated(booking);
+
+        // Send notification
+        await this.notificationsService.create(
+            'New Booking',
+            `Booking #${booking.id.slice(0, 8)} created for ${booking.customerName}`,
+            'SUCCESS',
+        );
 
         return booking;
     }
