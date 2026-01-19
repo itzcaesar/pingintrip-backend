@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, Driver, Vehicle, GpsDevice, Booking, DriverRole, DriverStatus, VehicleType, BookingStatus, BookingSource, NotificationType } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
 
 const prisma = new PrismaClient();
@@ -133,6 +133,7 @@ async function main() {
     await prisma.gpsDevice.deleteMany({});
     await prisma.driver.deleteMany({});
     await prisma.notification.deleteMany({});
+    await prisma.systemSetting.deleteMany({});
     // Keep users
 
     // ========================================================================
@@ -180,14 +181,14 @@ async function main() {
         { name: 'Komang Budi', role: 'DRIVER', status: 'ACTIVE' },
     ];
 
-    const drivers: any[] = [];
+    const drivers: Driver[] = [];
     for (const d of driverData) {
         const driver = await prisma.driver.create({
             data: {
                 name: d.name,
                 phone: randomIndonesianPhone(),
-                role: d.role as any,
-                status: d.status as any,
+                role: d.role as DriverRole,
+                status: d.status as DriverStatus,
                 notes: d.role === 'GUIDE' ? 'Certified tour guide with 5+ years experience' : null,
             },
         });
@@ -199,8 +200,8 @@ async function main() {
     // 3. GPS DEVICES (23 devices - one per vehicle)
     // ========================================================================
     console.log('\n📍 Creating GPS devices...');
-    const gpsDevices: any[] = [];
-    for (let i = 1; i <= 23; i++) {
+    const gpsDevices: GpsDevice[] = [];
+    for (let i = 1; i <= 23; i++) {  // 23 devices for 23 vehicles
         const device = await prisma.gpsDevice.create({
             data: {
                 deviceId: `GPS-${String(i).padStart(3, '0')}`,
@@ -211,7 +212,7 @@ async function main() {
     console.log(`   ✓ ${gpsDevices.length} GPS devices created`);
 
     // ========================================================================
-    // 4. VEHICLES (18 vehicles: 10 cars, 8 motorcycles)
+    // 4. VEHICLES (26 vehicles: 15 cars, 8 motorcycles, 3 vans)
     // ========================================================================
     console.log('\n🚙 Creating vehicles...');
     const vehicleData = [
@@ -240,15 +241,19 @@ async function main() {
         { type: 'MOTOR', brand: 'Yamaha', model: 'Aerox 155', plate: 'DR 1133 FF', cap: 2, rate: 100000, odo: 19000 },
         { type: 'MOTOR', brand: 'Honda', model: 'ADV 160', plate: 'DR 4466 II', cap: 2, rate: 150000, odo: 9000 },
         { type: 'MOTOR', brand: 'Kawasaki', model: 'Ninja 250', plate: 'DR 5577 JJ', cap: 2, rate: 250000, odo: 7500 },
+        // VANS (3 units)
+        { type: 'VAN', brand: 'Toyota', model: 'HiAce Premio', plate: 'DR 1001 VN', cap: 12, rate: 1500000, odo: 35000 },
+        { type: 'VAN', brand: 'Isuzu', model: 'Elf NLR', plate: 'DR 1002 VN', cap: 14, rate: 1300000, odo: 48000 },
+        { type: 'VAN', brand: 'Mercedes', model: 'Sprinter', plate: 'DR 1003 VN', cap: 16, rate: 2000000, odo: 28000 },
     ];
 
-    const vehicles: any[] = [];
+    const vehicles: Vehicle[] = [];
     for (let i = 0; i < vehicleData.length; i++) {
         const v = vehicleData[i];
         const gps = gpsDevices[i];
         const vehicle = await prisma.vehicle.create({
             data: {
-                type: v.type as any,
+                type: v.type as VehicleType,
                 brand: v.brand,
                 model: v.model,
                 plateNumber: v.plate,
@@ -359,13 +364,14 @@ async function main() {
         ...Array(4).fill({ status: 'CANCELLED', dayOffset: () => -5 - Math.floor(Math.random() * 30), hasVehicle: false }),
     ];
 
-    const bookings: any[] = [];
-    const sources = ['WEB', 'GFORM', 'MANUAL'];
+    const bookings: Booking[] = [];
+    const sources: BookingSource[] = ['WEB', 'GFORM', 'MANUAL'];
     const usedVehicleIds = new Set<string>();
 
     for (const config of bookingConfigs) {
         const customer = randomElement(customerProfiles);
-        const vehicleType = Math.random() > 0.35 ? 'CAR' : 'MOTOR';
+        const rand = Math.random();
+        const vehicleType: VehicleType = rand > 0.65 ? 'CAR' : rand > 0.15 ? 'MOTOR' : 'VAN';
         const duration = vehicleType === 'MOTOR' ? (1 + Math.floor(Math.random() * 3)) : (1 + Math.floor(Math.random() * 5));
         const pickupDate = getDateDaysFromNow(config.dayOffset());
 
@@ -412,14 +418,14 @@ async function main() {
             data: {
                 customerName: customer.name,
                 phone: customer.phone,
-                source: randomElement(sources) as any,
-                vehicleType: vehicleType as any,
+                source: randomElement(sources),
+                vehicleType: vehicleType,
                 pickupDate,
                 duration,
                 pickupLocation: randomElement(LOMBOK_PICKUP_LOCATIONS),
                 dropoffLocation: randomElement(LOMBOK_DESTINATIONS),
                 notes: Math.random() > 0.7 ? 'Customer requests early pickup' : null,
-                status: config.status as any,
+                status: config.status as BookingStatus,
                 totalPrice,
                 assignedVehicleId: assignedVehicle?.id,
                 assignedDriverId: assignedDriver?.id,
@@ -491,13 +497,37 @@ async function main() {
             data: {
                 title: notifications[i].title,
                 message: notifications[i].message,
-                type: notifications[i].type as any,
+                type: notifications[i].type as NotificationType,
                 isRead: i < 3, // First 3 are read
                 createdAt: getDateDaysFromNow(-Math.floor(Math.random() * 7)),
             },
         });
     }
     console.log(`   ✓ ${notifications.length} notifications created`);
+
+    // ========================================================================
+    // 9. SYSTEM SETTINGS
+    // ========================================================================
+    console.log('\n⚙️  Creating system settings...');
+
+    const systemSettings = [
+        { key: 'business_name', value: JSON.stringify('Pingintrip Lombok'), category: 'BUSINESS' },
+        { key: 'business_phone', value: JSON.stringify('+62 370 123 4567'), category: 'BUSINESS' },
+        { key: 'business_email', value: JSON.stringify('info@pingintrip.com'), category: 'BUSINESS' },
+        { key: 'business_address', value: JSON.stringify('Jl. Raya Senggigi No. 123, Lombok Barat, NTB'), category: 'BUSINESS' },
+        { key: 'currency', value: JSON.stringify('IDR'), category: 'GENERAL' },
+        { key: 'timezone', value: JSON.stringify('Asia/Makassar'), category: 'GENERAL' },
+        { key: 'default_rental_start_time', value: JSON.stringify('08:00'), category: 'BOOKING' },
+        { key: 'min_booking_duration', value: JSON.stringify(1), category: 'BOOKING' },
+        { key: 'max_booking_duration', value: JSON.stringify(30), category: 'BOOKING' },
+        { key: 'oil_change_reminder_km', value: JSON.stringify(5000), category: 'MAINTENANCE' },
+        { key: 'coolant_change_reminder_km', value: JSON.stringify(40000), category: 'MAINTENANCE' },
+    ];
+
+    for (const setting of systemSettings) {
+        await prisma.systemSetting.create({ data: setting });
+    }
+    console.log(`   ✓ ${systemSettings.length} system settings created`);
 
     // ========================================================================
     // SUMMARY
@@ -514,6 +544,7 @@ async function main() {
     console.log(`      - Maintenance: ${maintenanceCount}`);
     console.log(`      - GPS Locations: ${gpsLocationCount}`);
     console.log(`      - Notifications: ${notifications.length}`);
+    console.log(`      - System Settings: ${systemSettings.length}`);
     console.log('');
     console.log('   🔑 Login Credentials:');
     console.log('      Admin: admin@pingintrip.com / admin123');
