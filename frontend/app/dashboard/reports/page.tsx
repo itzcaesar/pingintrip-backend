@@ -174,7 +174,7 @@ export default function ReportsPage() {
     const bookingsByVehicle = bookings.reduce((acc: { name: string; bookings: number }[], booking) => {
         const vehicleName = booking.assignedVehicle
             ? `${booking.assignedVehicle.brand} ${booking.assignedVehicle.model}`
-            : booking.vehicleType;
+            : "Unassigned";
         const existing = acc.find(item => item.name === vehicleName);
         if (existing) {
             existing.bookings++;

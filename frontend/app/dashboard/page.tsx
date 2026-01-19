@@ -40,6 +40,11 @@ type Booking = {
     status: string;
     totalAmount: number;
     createdAt: string;
+    assignedVehicle?: {
+        brand: string;
+        model: string;
+        plateNumber: string;
+    };
 };
 
 const formatIDR = (value: number) =>
@@ -245,7 +250,9 @@ export default function DashboardPage() {
                                             <div>
                                                 <p className="text-sm font-medium leading-none text-foreground">{booking.customerName}</p>
                                                 <p className="text-xs text-muted-foreground">
-                                                    {booking.vehicleType} • {format(new Date(booking.pickupDate), 'dd MMM yyyy')}
+                                                    {booking.assignedVehicle
+                                                        ? `${booking.assignedVehicle.brand} ${booking.assignedVehicle.model}`
+                                                        : `${booking.vehicleType} (Unassigned)`} • {format(new Date(booking.pickupDate), 'dd MMM yyyy')}
                                                 </p>
                                             </div>
                                         </div>
